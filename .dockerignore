@@ -1,0 +1,8 @@
+node_modules
+CombinedMaths.Api/bin
+CombinedMaths.Api/obj
+CombinedMaths.Api/*.db
+CombinedMaths.Api/wwwroot/uploads/submissions/*
+CombinedMaths.Api/wwwroot/uploads/papers/*
+.git
+dist
