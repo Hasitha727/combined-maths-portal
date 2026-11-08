@@ -44,88 +44,19 @@ import {
 } from 'lucide-react';
 
 // ---------------------------------------------------------------------------------
-// INITIAL DATA
+// INITIAL DATA (Real-World: Starts Clean with No Dummy Content)
 // ---------------------------------------------------------------------------------
-const INITIAL_PAPERS = [
-  {
-    id: 'paper-2026-01',
-    code: 'CM-26-P01',
-    title: 'Model Paper 01 - Pure Mathematics (Calculus, Trigonometry & Induction)',
-    subject: 'Pure Mathematics',
-    courseName: 'Combined Mathematics 2026 (A/L)',
-    durationMinutes: 180, // 3 hours writing
-    gracePeriodMinutes: 15, // 15 mins for scanning & upload
-    openedDate: 'Tuesday, 20 October 2026, 6:00 PM',
-    dueDate: 'Wednesday, 4 November 2026, 11:59 PM',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-    pdfFileName: 'Model_Paper_01_Pure_Mathematics.pdf',
-    pdfFileSize: '2.4 MB',
-    instructions: 'සියලුම ප්‍රශ්න වලට පිළිතුරු සපයන්න. පැහැදිලි පියවර සටහන් කරන්න. "Start Exam" බොත්තම එබූ විගස පමණක් ප්‍රශ්න පත්‍රය විවෘත වන අතර නියමිත කාලය ගණනය වීම ආරම්භ වේ.',
-    totalMarks: 100
-  },
-  {
-    id: 'paper-2026-02',
-    code: 'CM-26-A04',
-    title: 'Speed Revision Test 04 - Applied Maths (Relative Velocity & Dynamics)',
-    subject: 'Applied Mathematics',
-    courseName: 'Combined Mathematics 2026 (A/L)',
-    durationMinutes: 60, // 1 hour test
-    gracePeriodMinutes: 10,
-    openedDate: 'Thursday, 22 October 2026, 4:00 PM',
-    dueDate: 'Thursday, 5 November 2026, 11:59 PM',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-    pdfFileName: 'Speed_Revision_Test_04_Applied.pdf',
-    pdfFileSize: '1.8 MB',
-    instructions: 'ගුරුත්වාකර්ශන ත්වරණය g = 10 m/s² ලෙස ගන්න. ප්‍රවේග-කාල ප්‍රස්තාර අනිවාර්ය වේ. රූප සටහන් පැහැදිලිව අඳින්න.',
-    totalMarks: 50
-  }
-];
-
-const INITIAL_SUBMISSIONS = [
-  {
-    id: 'sub-001',
-    paperId: 'paper-2026-02',
-    studentName: 'Kavindu Theekshana',
-    studentIndex: 'CM-26-042',
-    studentEmail: 'cm26042@student.maths.lk',
-    submittedAt: 'Thursday, 22 October 2026, 5:12 PM',
-    status: 'ON_TIME', // ON_TIME | LATE | DISQUALIFIED
-    durationTakenMins: 52,
-    fileName: 'Kavindu_Applied_SpeedTest04.pdf',
-    fileSizeMb: '4.8 MB',
-    filesCount: 1,
-    tabSwitches: 0,
-    marks: 46,
-    feedback: 'Excellent graphical analysis in Q2. Step presentation is top tier.'
-  }
-];
+const INITIAL_PAPERS = [];
+const INITIAL_SUBMISSIONS = [];
 
 const PRESET_USERS = {
   teacher: {
     id: 'usr-teacher-01',
     name: 'Eng. K. A. Perera',
     role: 'teacher',
-    roleTitle: 'Teacher / Course Lecturer',
-    email: 'k.perera@maths.lk',
+    roleTitle: 'Course Lecturer (Combined Mathematics)',
+    email: 'teacher@maths.lk',
     initials: 'KP'
-  },
-  student1: {
-    id: 'usr-student-01',
-    name: 'Dilshan Rajapaksha',
-    role: 'student',
-    roleTitle: 'Student (2026 A/L Batch)',
-    email: 'cm26089@student.maths.lk',
-    indexNo: 'CM-2026-089',
-    initials: 'DR'
-  },
-  student2: {
-    id: 'usr-student-02',
-    name: 'Kavindu Theekshana',
-    role: 'student',
-    roleTitle: 'Student (2026 A/L Batch)',
-    email: 'cm26042@student.maths.lk',
-    indexNo: 'CM-26-042',
-    initials: 'KT'
   }
 };
 
@@ -155,7 +86,7 @@ export default function App() {
 
   // Navigation: 'courses' | 'assignment' | 'teacher_grading'
   const [activeView, setActiveView] = useState('courses');
-  const [selectedPaperId, setSelectedPaperId] = useState(INITIAL_PAPERS[0].id);
+  const [selectedPaperId, setSelectedPaperId] = useState(null);
 
   // Modals & UI States
   const [showConfirmStartModal, setShowConfirmStartModal] = useState(false);
@@ -173,26 +104,40 @@ export default function App() {
     async function fetchFromBackend() {
       try {
         const fetchedPapers = await api.getPapers();
-        if (fetchedPapers && fetchedPapers.length > 0) {
-          setPapers(fetchedPapers);
-          setIsBackendConnected(true);
-        }
+        setPapers(fetchedPapers || []);
+        setIsBackendConnected(true);
       } catch {
         console.info('Backend not available yet, using local state.');
       }
 
       try {
         const fetchedSubmissions = await api.getSubmissions();
-        if (fetchedSubmissions && fetchedSubmissions.length > 0) {
-          setSubmissions(fetchedSubmissions);
-          setIsBackendConnected(true);
-        }
+        setSubmissions(fetchedSubmissions || []);
+        setIsBackendConnected(true);
       } catch {
         // fallback
       }
     }
     fetchFromBackend();
   }, []);
+
+  const handleDeletePaper = async (paperId) => {
+    if (!window.confirm('මෙම ප්‍රශ්න පත්‍රය ස්ථිරවම මකා දැමීමට අවශ්‍ය බව සහතිකද? (Are you sure you want to delete this paper?)')) {
+      return;
+    }
+    try {
+      await api.deletePaper(paperId);
+    } catch (err) {
+      console.warn('API delete paper fallback:', err);
+    }
+    setPapers(prev => prev.filter(p => p.id !== paperId));
+    setSubmissions(prev => prev.filter(s => s.paperId !== paperId));
+    if (selectedPaperId === paperId) {
+      setSelectedPaperId(null);
+      setActiveView('courses');
+    }
+    showToast('ප්‍රශ්න පත්‍රය සාර්ථකව මකා දමන ලදී (Paper deleted).', 'info');
+  };
 
   // Sync with LocalStorage
   useEffect(() => {
@@ -262,8 +207,8 @@ export default function App() {
     showToast('You have been logged out.', 'info');
   };
 
-  const currentPaper = papers.find(p => p.id === selectedPaperId) || papers[0];
-  const userSubmission = currentUser?.role === 'student'
+  const currentPaper = papers.find(p => p.id === selectedPaperId) || papers[0] || null;
+  const userSubmission = (currentUser?.role === 'student' && currentPaper)
     ? submissions.find(s => s.paperId === currentPaper.id && s.studentIndex === currentUser.indexNo)
     : null;
 
@@ -470,125 +415,86 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Navbar matching Campus Moodle */}
+      {/* Top Navbar */}
       <header className="bg-white border-b border-[#dee2e6] sticky top-0 z-40 px-4 md:px-6 py-2.5 flex items-center justify-between shadow-xs">
-        <div className="flex items-center space-x-4 md:space-x-6">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#997300] to-[#cca300] flex items-center justify-center text-white border-2 border-[#806000] shadow-xs">
+        <div className="flex items-center space-x-3 md:space-x-4">
+          <div 
+            onClick={() => setActiveView('courses')}
+            className="flex items-center space-x-2.5 cursor-pointer"
+          >
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#997300] to-[#cca300] flex items-center justify-center text-white border-2 border-[#806000] shadow-xs shrink-0">
               <GraduationCap className="w-5 h-5 text-amber-100" />
             </div>
-            <div className="hidden sm:block">
-              <span className="font-semibold text-sm text-[#1d2125] block leading-tight">
-                Combined Maths LMS
+            <div>
+              <span className="font-bold text-sm text-[#1d2125] block leading-tight">
+                Combined Mathematics
               </span>
-              <span className="text-[11px] text-[#6c757d]">Strict Timed Testing Portal</span>
+              <span className="text-[11px] text-[#6c757d]">2026 A/L Testing Portal</span>
             </div>
           </div>
 
-          <nav className="flex items-center space-x-4 text-xs font-normal text-[#1d2125] pl-2">
+          <div className="hidden sm:flex items-center space-x-1 pl-3 border-l border-slate-200">
             <button 
               onClick={() => setActiveView('courses')}
-              className={`hover:text-[#0f6cbf] transition ${activeView === 'courses' ? 'font-semibold text-[#0f6cbf]' : ''}`}
+              className={`px-3 py-1.5 rounded text-xs font-semibold transition ${
+                activeView === 'courses' 
+                  ? 'bg-[#e7f1ff] text-[#0f6cbf]' 
+                  : 'text-[#495057] hover:bg-slate-100'
+              }`}
             >
-              Home
+              ප්‍රශ්න පත්‍ර (Papers)
             </button>
-            <button 
-              onClick={() => setActiveView('courses')}
-              className="hover:text-[#0f6cbf] transition hidden md:inline"
-            >
-              Dashboard
-            </button>
-            <button 
-              onClick={() => setActiveView('courses')}
-              className="hover:text-[#0f6cbf] transition hidden sm:inline"
-            >
-              My courses
-            </button>
-          </nav>
+            {currentUser.role === 'teacher' && (
+              <button 
+                onClick={() => setActiveView('teacher_grading')}
+                className={`px-3 py-1.5 rounded text-xs font-semibold transition ${
+                  activeView === 'teacher_grading' 
+                    ? 'bg-[#e7f1ff] text-[#0f6cbf]' 
+                    : 'text-[#495057] hover:bg-slate-100'
+                }`}
+              >
+                ලකුණු ලබා දීම (Grading)
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center space-x-3">
-          {/* Backend Status Indicator */}
-          <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded bg-[#f8f9fa] border border-[#dee2e6] text-[11px] font-medium text-[#495057]">
-            <span className={`w-2 h-2 rounded-full ${isBackendConnected ? 'bg-emerald-500 animate-pulse' : 'bg-blue-400'}`}></span>
-            <span>{isBackendConnected ? 'ASP.NET Core Connected' : '.NET API Ready'}</span>
-          </div>
-
-          <button className="relative p-1.5 text-[#495057] hover:text-[#0f6cbf] rounded-full hover:bg-slate-100 transition">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-0 right-0 bg-[#d9383a] text-white text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
-              9
-            </span>
-          </button>
-
-          <button className="p-1.5 text-[#495057] hover:text-[#0f6cbf] rounded-full hover:bg-slate-100 transition">
-            <MessageSquare className="w-4 h-4" />
-          </button>
-
-          {/* User Profile */}
-          <div className="relative">
+        <div className="flex items-center space-x-2.5">
+          {currentUser.role === 'teacher' && (
             <button
-              onClick={() => setShowUserDropdown(!showUserDropdown)}
-              className="flex items-center space-x-1.5 py-1 px-2 rounded-md hover:bg-slate-100 transition"
+              onClick={() => setShowAddPaperModal(true)}
+              className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#0f6cbf] hover:bg-[#0b5190] text-white font-medium text-xs transition shadow-xs"
             >
-              <div className="w-7 h-7 rounded-full bg-[#0f6cbf] text-white text-[11px] font-bold flex items-center justify-center">
-                {currentUser.initials || 'US'}
-              </div>
-              <span className="text-xs text-[#495057] hidden md:inline font-medium">
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>Add Model Paper</span>
+            </button>
+          )}
+
+          {/* User Badge */}
+          <div className="flex items-center space-x-2 px-2.5 py-1 bg-[#f8f9fa] border border-[#dee2e6] rounded-md text-xs">
+            <div className="w-6 h-6 rounded-full bg-[#0f6cbf] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+              {currentUser.initials || 'ST'}
+            </div>
+            <div className="text-left">
+              <span className="font-semibold text-[#1d2125] block leading-none">
                 {currentUser.name}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-[#6c757d]" />
-            </button>
-
-            {showUserDropdown && (
-              <div className="absolute right-0 mt-1 w-64 bg-white border border-[#dee2e6] rounded-md shadow-lg py-2 z-50 text-xs">
-                <div className="px-3 py-2 border-b border-[#dee2e6] bg-[#f8f9fa]">
-                  <div className="font-semibold text-[#1d2125]">{currentUser.name}</div>
-                  <div className="text-[11px] text-[#6c757d]">{currentUser.email}</div>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-medium bg-[#e7f1ff] text-[#0f6cbf]">
-                    {currentUser.roleTitle}
-                  </span>
-                </div>
-
-                <div className="py-1">
-                  <button
-                    onClick={() => {
-                      setActiveView('courses');
-                      setShowUserDropdown(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 hover:bg-slate-100 flex items-center space-x-2 text-[#495057]"
-                  >
-                    <BookOpen className="w-3.5 h-3.5" />
-                    <span>My Courses & Papers</span>
-                  </button>
-
-                  {currentUser.role === 'teacher' && (
-                    <button
-                      onClick={() => {
-                        setActiveView('teacher_grading');
-                        setShowUserDropdown(false);
-                      }}
-                      className="w-full text-left px-3 py-1.5 hover:bg-slate-100 flex items-center space-x-2 text-[#495057]"
-                    >
-                      <Layers className="w-3.5 h-3.5" />
-                      <span>Grading Console</span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="border-t border-[#dee2e6] pt-1">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-3 py-1.5 hover:bg-rose-50 text-[#d9383a] flex items-center space-x-2 font-medium"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Log out (පද්ධතියෙන් ඉවත් වන්න)</span>
-                  </button>
-                </div>
-              </div>
-            )}
+              <span className="text-[10px] text-[#6c757d]">
+                {currentUser.role === 'student' ? (currentUser.indexNo || 'Student') : 'Teacher / Admin'}
+              </span>
+            </div>
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded bg-rose-50 text-[#d9383a] hover:bg-rose-100 border border-rose-200 text-xs font-medium transition flex items-center space-x-1"
+            title="Log out (පද්ධතියෙන් ඉවත් වන්න)"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Log out</span>
+          </button>
         </div>
       </header>
 
@@ -603,9 +509,14 @@ export default function App() {
               setSelectedPaperId(paperId);
               setActiveView('assignment');
             }}
+            onDeletePaper={handleDeletePaper}
+            onOpenGrading={(paperId) => {
+              setSelectedPaperId(paperId);
+              setActiveView('teacher_grading');
+            }}
             onOpenAddPaperModal={() => setShowAddPaperModal(true)}
           />
-        ) : activeView === 'assignment' ? (
+        ) : activeView === 'assignment' && currentPaper ? (
           <MoodleExamAssignmentView 
             paper={currentPaper}
             currentUser={currentUser}
@@ -622,7 +533,7 @@ export default function App() {
             onViewAllSubmissions={() => setActiveView('teacher_grading')}
             onBack={() => setActiveView('courses')}
           />
-        ) : (
+        ) : activeView === 'teacher_grading' && currentPaper ? (
           <MoodleTeacherGradingView 
             paper={currentPaper}
             papers={papers}
@@ -631,11 +542,27 @@ export default function App() {
             onGradeSubmission={(sub) => setGradingSubmission(sub)}
             onBack={() => setActiveView('assignment')}
           />
+        ) : (
+          <MoodleCoursesView 
+            papers={papers}
+            currentUser={currentUser}
+            submissions={submissions}
+            onSelectPaper={(paperId) => {
+              setSelectedPaperId(paperId);
+              setActiveView('assignment');
+            }}
+            onDeletePaper={handleDeletePaper}
+            onOpenGrading={(paperId) => {
+              setSelectedPaperId(paperId);
+              setActiveView('teacher_grading');
+            }}
+            onOpenAddPaperModal={() => setShowAddPaperModal(true)}
+          />
         )}
       </main>
 
       {/* Start Exam Confirmation Modal (Anti-Leak Protection) */}
-      {showConfirmStartModal && (
+      {showConfirmStartModal && currentPaper && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-lg border border-[#dee2e6] max-w-md w-full p-6 space-y-4 shadow-xl">
             <div className="w-12 h-12 rounded-full bg-[#e7f1ff] text-[#0f6cbf] flex items-center justify-center">
@@ -689,7 +616,7 @@ export default function App() {
       )}
 
       {/* Grade Submission Modal (Teacher) */}
-      {gradingSubmission && (
+      {gradingSubmission && currentPaper && (
         <MoodleGradeModal 
           submission={gradingSubmission}
           paper={currentPaper}
@@ -710,14 +637,11 @@ export default function App() {
         />
       )}
 
-      {/* Clean Moodle Footer */}
-      <footer className="bg-white border-t border-[#dee2e6] py-4 mt-auto text-center text-xs text-[#6c757d]">
+      {/* Clean Footer */}
+      <footer className="bg-white border-t border-[#dee2e6] py-3 mt-auto text-center text-xs text-[#6c757d]">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Logged in as <b>{currentUser.name}</b> ({currentUser.roleTitle})</span>
-          <span className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${isBackendConnected ? 'bg-emerald-500' : 'bg-blue-400'}`}></span>
-            <span>Powered by <b>ASP.NET Core 8 Web API</b> &bull; React 19 &bull; SQLite</span>
-          </span>
+          <span>Combined Mathematics 2026 (A/L) &bull; Online Examination Portal</span>
+          <span>Logged in as <b>{currentUser.name}</b> {currentUser.indexNo ? `(${currentUser.indexNo})` : ''}</span>
         </div>
       </footer>
     </div>
@@ -731,8 +655,8 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
   
   // Login Form State
-  const [identifier, setIdentifier] = useState('cm26089@student.maths.lk');
-  const [password, setPassword] = useState('123456');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -759,7 +683,7 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
       const matched = Object.values(presetUsers).find(
         u => u.email.toLowerCase() === identifier.toLowerCase() || (u.indexNo && u.indexNo.toLowerCase() === identifier.toLowerCase())
       );
-      if (matched) {
+      if (matched && password === 'admin') {
         onLogin(matched);
       } else {
         setLoginError(err.message || 'Invalid username or password. Please try again.');
@@ -892,35 +816,18 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
               </button>
             </form>
 
-            {/* Quick Demo Switcher */}
-            <div className="pt-2 border-t border-[#dee2e6]">
-              <span className="font-semibold text-[#6c757d] block text-[10px] uppercase mb-1.5">
-                Quick Demo Switcher:
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIdentifier(presetUsers.teacher.email);
-                    setPassword('123456');
-                  }}
-                  className="p-1.5 rounded text-left border border-[#dee2e6] hover:bg-[#e7f1ff] transition bg-white"
-                >
-                  <div className="font-semibold text-[11px] text-[#0f6cbf]">Teacher (Lecturer)</div>
-                  <div className="text-[10px] text-[#6c757d]">{presetUsers.teacher.name}</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIdentifier(presetUsers.student1.email);
-                    setPassword('123456');
-                  }}
-                  className="p-1.5 rounded text-left border border-[#dee2e6] hover:bg-[#e7f1ff] transition bg-white"
-                >
-                  <div className="font-semibold text-[11px] text-[#0f6cbf]">Student 01</div>
-                  <div className="text-[10px] text-[#6c757d]">{presetUsers.student1.name}</div>
-                </button>
-              </div>
+            {/* Lecturer Quick Access */}
+            <div className="pt-2 border-t border-[#dee2e6] text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIdentifier('teacher@maths.lk');
+                  setPassword('admin');
+                }}
+                className="text-[11px] text-[#0f6cbf] hover:underline"
+              >
+                Course Lecturer / Admin Login (Click to fill)
+              </button>
             </div>
           </div>
         )}
@@ -1032,21 +939,13 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
 // ---------------------------------------------------------------------------------
 // 2. COURSES / PAPERS LIST VIEW
 // ---------------------------------------------------------------------------------
-function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, onOpenAddPaperModal }) {
+function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, onDeletePaper, onOpenGrading, onOpenAddPaperModal }) {
   return (
     <div className="space-y-5">
-      <div className="text-xs text-[#6c757d] flex items-center space-x-1">
-        <span className="text-[#0f6cbf]">Home</span>
-        <span>/</span>
-        <span className="text-[#0f6cbf]">My courses</span>
-        <span>/</span>
-        <span className="text-[#1d2125] font-medium">Combined Mathematics 2026 (A/L)</span>
-      </div>
-
       <div className="bg-white rounded-lg border border-[#dee2e6] p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <span className="text-[11px] font-semibold text-[#0f6cbf] uppercase tracking-wide">
-            Combined Mathematics A/L 2026
+            Combined Mathematics 2026 (A/L)
           </span>
           <h2 className="text-xl font-bold text-[#1d2125] mt-0.5">
             Examination Papers & Real-Time Test Portal
@@ -1059,10 +958,10 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
         {currentUser.role === 'teacher' && (
           <button
             onClick={onOpenAddPaperModal}
-            className="flex items-center space-x-1.5 px-3 py-2 rounded bg-[#0f6cbf] hover:bg-[#0b5190] text-white font-medium text-xs transition shrink-0"
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded bg-[#0f6cbf] hover:bg-[#0b5190] text-white font-medium text-xs transition shrink-0 shadow-xs"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Add an exam paper</span>
+            <span>Add an exam paper (නව පත්‍රයක් එක් කරන්න)</span>
           </button>
         )}
       </div>
@@ -1072,67 +971,115 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
         <div className="p-4 border-b border-[#dee2e6] bg-[#f8f9fa] flex items-center justify-between">
           <h3 className="font-bold text-sm text-[#1d2125] flex items-center space-x-2">
             <BookOpen className="w-4 h-4 text-[#0f6cbf]" />
-            <span>Assigned Papers</span>
+            <span>Assigned Examination Papers</span>
           </h3>
           <span className="text-xs text-[#6c757d] font-mono">{papers.length} Papers Active</span>
         </div>
 
-        <div className="divide-y divide-[#dee2e6]">
-          {papers.map((paper) => {
-            const studentSub = submissions.find(
-              s => s.paperId === paper.id && s.studentIndex === currentUser.indexNo
-            );
-
-            return (
-              <div 
-                key={paper.id} 
-                className="p-4 hover:bg-[#f8f9fa] transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4 cursor-pointer"
-                onClick={() => onSelectPaper(paper.id)}
+        {papers.length === 0 ? (
+          <div className="p-12 text-center space-y-3">
+            <div className="w-14 h-14 rounded-full bg-[#f8f9fa] border border-[#dee2e6] text-[#6c757d] mx-auto flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-[#0f6cbf]" />
+            </div>
+            <div>
+              <h4 className="font-bold text-sm text-[#1d2125]">දැනට සක්‍රීය ප්‍රශ්න පත්‍ර නොමැත (No Active Exam Papers)</h4>
+              <p className="text-xs text-[#6c757d] mt-1 max-w-md mx-auto">
+                {currentUser.role === 'teacher' 
+                  ? 'පන්තියේ සිසුන් සඳහා නව ප්‍රශ්න පත්‍රයක් (PDF) එක් කිරීමට පහත බොත්තම ඔබන්න.' 
+                  : 'ගුරුවරයා විසින් නව ප්‍රශ්න පත්‍රයක් ප්‍රකාශයට පත් කළ පසු එය මෙහි දිස්වනු ඇත.'}
+              </p>
+            </div>
+            {currentUser.role === 'teacher' && (
+              <button
+                onClick={onOpenAddPaperModal}
+                className="inline-flex items-center space-x-1.5 px-4 py-2 rounded bg-[#0f6cbf] hover:bg-[#0b5190] text-white font-medium text-xs transition shadow-xs mt-2"
               >
-                <div className="flex items-start space-x-3">
-                  <div className="w-9 h-9 rounded bg-[#fff0f6] border border-[#f783ac] flex items-center justify-center shrink-0 text-[#d6336c] mt-0.5">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-[#0f6cbf] hover:underline flex items-center gap-2">
-                      <span>{paper.title}</span>
-                      <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100 text-[#495057] border border-slate-200">
-                        {paper.code}
-                      </span>
-                    </h4>
-                    <p className="text-xs text-[#6c757d] mt-1 line-clamp-1">{paper.instructions}</p>
-                    <div className="flex items-center space-x-3 text-[11px] text-[#6c757d] mt-1.5">
-                      <span>Duration: <b>{paper.durationMinutes} mins</b></span>
-                      <span>&bull;</span>
-                      <span>Grace: <b>+{paper.gracePeriodMinutes} mins</b></span>
-                      <span>&bull;</span>
-                      <span>Due: <b>{paper.dueDate}</b></span>
+                <PlusCircle className="w-4 h-4" />
+                <span>නව ප්‍රශ්න පත්‍රයක් එක් කරන්න (Add Model Paper)</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-[#dee2e6]">
+            {papers.map((paper) => {
+              const studentSub = submissions.find(
+                s => s.paperId === paper.id && s.studentIndex === currentUser.indexNo
+              );
+
+              return (
+                <div 
+                  key={paper.id} 
+                  className="p-4 hover:bg-[#f8f9fa] transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                >
+                  <div 
+                    className="flex items-start space-x-3 cursor-pointer flex-1"
+                    onClick={() => onSelectPaper(paper.id)}
+                  >
+                    <div className="w-9 h-9 rounded bg-[#e7f1ff] border border-[#b6d4fe] flex items-center justify-center shrink-0 text-[#0f6cbf] mt-0.5">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-[#0f6cbf] hover:underline flex items-center gap-2">
+                        <span>{paper.title}</span>
+                        <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100 text-[#495057] border border-slate-200">
+                          {paper.code}
+                        </span>
+                      </h4>
+                      <p className="text-xs text-[#6c757d] mt-1 line-clamp-1">{paper.instructions}</p>
+                      <div className="flex items-center space-x-3 text-[11px] text-[#6c757d] mt-1.5">
+                        <span>Duration: <b>{paper.durationMinutes} mins</b></span>
+                        <span>&bull;</span>
+                        <span>Grace: <b>+{paper.gracePeriodMinutes} mins</b></span>
+                        <span>&bull;</span>
+                        <span>Due: <b>{paper.dueDate}</b></span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-3 self-end md:self-center shrink-0">
-                  {currentUser.role === 'student' ? (
-                    studentSub ? (
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded bg-[#d1e7dd] text-[#0f5132] border border-[#badbcc]">
-                        Submitted for grading
-                      </span>
+                  <div className="flex items-center space-x-2 self-end md:self-center shrink-0">
+                    {currentUser.role === 'student' ? (
+                      studentSub ? (
+                        <button
+                          onClick={() => onSelectPaper(paper.id)}
+                          className="text-xs font-semibold px-2.5 py-1.5 rounded bg-[#d1e7dd] text-[#0f5132] border border-[#badbcc] hover:bg-[#badbcc] transition"
+                        >
+                          {studentSub.marks !== null ? `Graded: ${studentSub.marks}/${paper.totalMarks}` : 'Submitted for Grading'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => onSelectPaper(paper.id)}
+                          className="text-xs font-semibold px-3 py-1.5 rounded bg-[#0f6cbf] hover:bg-[#0b5190] text-white transition shadow-xs flex items-center space-x-1"
+                        >
+                          <span>Start Exam</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      )
                     ) : (
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded bg-[#fff3cd] text-[#664d03] border border-[#ffecb5]">
-                        Not attempted
-                      </span>
-                    )
-                  ) : (
-                    <span className="text-xs font-medium text-[#0f6cbf] bg-[#e7f1ff] px-2.5 py-1 rounded">
-                      Manage / Grade
-                    </span>
-                  )}
-                  <ChevronRight className="w-4 h-4 text-[#adb5bd]" />
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => onOpenGrading(paper.id)}
+                          className="text-xs font-medium text-[#0f6cbf] bg-[#e7f1ff] hover:bg-[#b6d4fe] px-2.5 py-1.5 rounded border border-[#b6d4fe] transition"
+                        >
+                          Submissions & Grade
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeletePaper(paper.id);
+                          }}
+                          title="Delete Paper"
+                          className="p-1.5 rounded text-[#d9383a] hover:bg-[#f8d7da] transition border border-transparent hover:border-[#f5c2c7]"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1265,7 +1212,7 @@ function MoodleExamAssignmentView({
       {/* Breadcrumbs */}
       <div className="flex items-center justify-between text-xs text-[#0f6cbf]">
         <div className="flex items-center space-x-1.5 flex-wrap">
-          <button onClick={onBack} className="hover:underline">In23-S5-CM3101 (Combined Maths)</button>
+          <button onClick={onBack} className="hover:underline">Combined Mathematics 2026 (A/L)</button>
           <span>&gt;</span>
           <button onClick={onBack} className="hover:underline">{paper.code}</button>
           <span>&gt;</span>
@@ -1741,7 +1688,7 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
     <div className="space-y-4">
       <div className="flex items-center justify-between text-xs text-[#0f6cbf]">
         <div className="flex items-center space-x-1.5 flex-wrap">
-          <button onClick={onBack} className="hover:underline">In23-S5-CM3101 (Combined Maths)</button>
+          <button onClick={onBack} className="hover:underline">Combined Mathematics 2026 (A/L)</button>
           <span>&gt;</span>
           <button onClick={onBack} className="hover:underline">{paper.code}</button>
           <span>&gt;</span>

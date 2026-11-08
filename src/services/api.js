@@ -78,6 +78,14 @@ export const api = {
     return res.json();
   },
 
+  async deletePaper(id) {
+    const res = await fetch(`${API_BASE}/papers/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete paper');
+    return true;
+  },
+
   // Submissions
   async getSubmissions(paperId = null, studentIndex = null) {
     const params = new URLSearchParams();

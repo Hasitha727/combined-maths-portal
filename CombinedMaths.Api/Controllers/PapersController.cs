@@ -62,5 +62,27 @@ public class PapersController : ControllerBase
 
         return CreatedAtAction(nameof(GetPaper), new { id = paper.Id }, paper);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePaper(string id)
+    {
+        var paper = await _context.Papers.FindAsync(id);
+        if (paper == null)
+        {
+            return NotFound();
+        }
+
+        // Also delete any submissions or exam sessions associated with this paper
+        var submissions = await _context.Submissions.Where(s => s.PaperId == id).ToListAsync();
+        _context.Submissions.RemoveRange(submissions);
+
+        var sessions = await _context.ExamSessions.Where(s => s.PaperId == id).ToListAsync();
+        _context.ExamSessions.RemoveRange(sessions);
+
+        _context.Papers.Remove(paper);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
 
