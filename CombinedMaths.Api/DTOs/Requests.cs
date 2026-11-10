@@ -21,7 +21,8 @@ public record CreatePaperRequest(
     string? PdfUrl,
     string? PdfFileName,
     string? Instructions,
-    int? TotalMarks
+    int? TotalMarks,
+    string? Section = null
 );
 
 public record StartExamRequest(

@@ -17,6 +17,28 @@ public class PapersController : ControllerBase
         _context = context;
     }
 
+    private static readonly string[] CanonicalSections =
+    [
+        "Home Work Assignment",
+        "Challenge Papers",
+        "Week Test",
+        "Month Test",
+        "Full Papers",
+        "Tutes"
+    ];
+
+    private static string NormalizeSection(string? section)
+    {
+        if (string.IsNullOrWhiteSpace(section))
+        {
+            return "Full Papers";
+        }
+
+        var trimmed = section.Trim();
+        var match = CanonicalSections.FirstOrDefault(s => s.Equals(trimmed, StringComparison.OrdinalIgnoreCase));
+        return match ?? trimmed;
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Paper>>> GetPapers()
     {
@@ -46,6 +68,7 @@ public class PapersController : ControllerBase
             Code = $"CM-26-P{count + 1}",
             Title = request.Title,
             Subject = request.Subject,
+            Section = NormalizeSection(request.Section),
             CourseName = "Combined Mathematics 2026 (A/L)",
             DurationMinutes = request.DurationMinutes,
             GracePeriodMinutes = request.GracePeriodMinutes > 0 ? request.GracePeriodMinutes : 15,

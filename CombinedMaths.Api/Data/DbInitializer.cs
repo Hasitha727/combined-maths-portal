@@ -9,7 +9,7 @@ public static class DbInitializer
     {
         context.Database.EnsureCreated();
 
-        // Ensure StoredFiles table exists even on previously created databases
+        // Ensure StoredFiles table and Papers.Section column exist on previously created databases
         if (context.Database.IsNpgsql())
         {
             context.Database.ExecuteSqlRaw("""
@@ -22,6 +22,10 @@ public static class DbInitializer
                     "SizeBytes" BIGINT NOT NULL,
                     "CreatedAt" TIMESTAMPTZ NOT NULL
                 );
+                """);
+
+            context.Database.ExecuteSqlRaw("""
+                ALTER TABLE "Papers" ADD COLUMN IF NOT EXISTS "Section" TEXT NOT NULL DEFAULT 'Full Papers';
                 """);
         }
         else if (context.Database.IsSqlite())
@@ -37,6 +41,45 @@ public static class DbInitializer
                     "CreatedAt" TEXT NOT NULL
                 );
                 """);
+
+            var conn = context.Database.GetDbConnection();
+            var wasClosed = conn.State == System.Data.ConnectionState.Closed;
+            if (wasClosed)
+            {
+                conn.Open();
+            }
+
+            try
+            {
+                var hasSection = false;
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = """PRAGMA table_info("Papers");""";
+                    using var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        if (string.Equals(reader["name"]?.ToString(), "Section", StringComparison.OrdinalIgnoreCase))
+                        {
+                            hasSection = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!hasSection)
+                {
+                    context.Database.ExecuteSqlRaw("""
+                        ALTER TABLE "Papers" ADD COLUMN "Section" TEXT NOT NULL DEFAULT 'Full Papers';
+                        """);
+                }
+            }
+            finally
+            {
+                if (wasClosed)
+                {
+                    conn.Close();
+                }
+            }
         }
 
         // Ensure teacher account exists

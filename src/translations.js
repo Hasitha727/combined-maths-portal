@@ -1,6 +1,15 @@
 // Bilingual Dictionary for Combined Mathematics A/L Examination Portal
 // Default language: English ('en'), Secondary language: Sinhala ('si')
 
+export const PAPER_SECTIONS = [
+  'Home Work Assignment',
+  'Challenge Papers',
+  'Week Test',
+  'Month Test',
+  'Full Papers',
+  'Tutes',
+];
+
 export const TRANSLATIONS = {
   en: {
     common: {
@@ -97,12 +106,18 @@ export const TRANSLATIONS = {
         'Once you start an exam paper, the strict writing timer begins immediately. Answer scripts must be uploaded within the allotted time.',
       addExamPaperBtn: 'Add an exam paper',
       sectionTitle: 'Assigned Examination Papers',
+      allSectionTitle: 'All Examination Papers & Materials',
       papersActive: (n) => `${n} ${n === 1 ? 'Paper' : 'Papers'} Active`,
       emptyTitle: 'No Active Exam Papers',
       emptyTeacherDesc:
         'Click the button below to add and publish a new question paper (PDF) for class students.',
       emptyStudentDesc:
         'Once your lecturer publishes a new question paper, it will appear here.',
+      emptyInSectionTitle: (secLabel) => `No Papers in ${secLabel}`,
+      emptyInSectionTeacherDesc: (secLabel) =>
+        `Click the button below to add and publish a new PDF under "${secLabel}".`,
+      emptyInSectionStudentDesc: (secLabel) =>
+        `No exam papers or materials have been published under "${secLabel}" yet.`,
       addModelPaperBtn: 'Add Model Paper',
       durationLabel: 'Duration:',
       graceLabel: 'Grace:',
@@ -112,6 +127,19 @@ export const TRANSLATIONS = {
       startExamBtn: 'Start Exam',
       submissionsAndGradeBtn: 'Submissions & Grade',
       deletePaperTitle: 'Delete Paper',
+    },
+    sections: {
+      sidebarTitle: 'Class Sections',
+      allSections: 'All Sections',
+      sectionLabel: 'Section:',
+      items: {
+        'Home Work Assignment': 'Home Work Assignment',
+        'Challenge Papers': 'Challenge Papers',
+        'Week Test': 'Week Test',
+        'Month Test': 'Month Test',
+        'Full Papers': 'Full Papers',
+        Tutes: 'Tutes',
+      },
     },
     assignment: {
       backToPapers: 'Back to papers',
@@ -200,6 +228,7 @@ export const TRANSLATIONS = {
       heading: 'Add a new Exam Paper / Test',
       paperTitleLabel: 'Paper Title',
       paperTitlePlaceholder: 'e.g. Model Paper 03 - Pure Mathematics',
+      sectionLabel: 'Paper Section',
       subjectStreamLabel: 'Subject Stream',
       streamPure: 'Pure Mathematics',
       streamApplied: 'Applied Mathematics',
@@ -318,12 +347,18 @@ export const TRANSLATIONS = {
         'ප්‍රශ්න පත්‍රය ආරම්භ කළ විගස නියමිත කාලය ගණනය වන අතර, නියමිත වේලාව තුළ පමණක් පිළිතුරු upload කළ යුතුය.',
       addExamPaperBtn: 'නව ප්‍රශ්න පත්‍රයක් එක් කරන්න',
       sectionTitle: 'නියමිත විභාග ප්‍රශ්න පත්‍ර',
+      allSectionTitle: 'සියලුම ප්‍රශ්න පත්‍ර සහ නිබන්ධන',
       papersActive: (n) => `සක්‍රීය ප්‍රශ්න පත්‍ර ${n} කි`,
       emptyTitle: 'දැනට සක්‍රීය ප්‍රශ්න පත්‍ර නොමැත',
       emptyTeacherDesc:
         'පන්තියේ සිසුන් සඳහා නව ප්‍රශ්න පත්‍රයක් (PDF) එක් කිරීමට පහත බොත්තම ඔබන්න.',
       emptyStudentDesc:
         'ගුරුවරයා විසින් නව ප්‍රශ්න පත්‍රයක් ප්‍රකාශයට පත් කළ පසු එය මෙහි දිස්වනු ඇත.',
+      emptyInSectionTitle: (secLabel) => `${secLabel} අංශයේ දැනට පත්‍ර නොමැත`,
+      emptyInSectionTeacherDesc: (secLabel) =>
+        `"${secLabel}" අංශය යටතේ නව PDF ගොනුවක් එක් කිරීමට පහත බොත්තම ඔබන්න.`,
+      emptyInSectionStudentDesc: (secLabel) =>
+        `"${secLabel}" අංශය යටතේ තවමත් කිසිදු ප්‍රශ්න පත්‍රයක් හෝ නිබන්ධනයක් පළ කර නොමැත.`,
       addModelPaperBtn: 'නව ප්‍රශ්න පත්‍රයක් එක් කරන්න',
       durationLabel: 'කාලය:',
       graceLabel: 'අමතර කාලය:',
@@ -333,6 +368,19 @@ export const TRANSLATIONS = {
       startExamBtn: 'විභාගය අරඹන්න',
       submissionsAndGradeBtn: 'පිළිතුරු සහ ලකුණු',
       deletePaperTitle: 'ප්‍රශ්න පත්‍රය මකන්න',
+    },
+    sections: {
+      sidebarTitle: 'පන්ති අංශ (Sections)',
+      allSections: 'සියලුම අංශ (All)',
+      sectionLabel: 'අංශය:',
+      items: {
+        'Home Work Assignment': 'ගෙදර වැඩ (Home Work Assignment)',
+        'Challenge Papers': 'අභියෝග පත්‍ර (Challenge Papers)',
+        'Week Test': 'සතිපතා පරීක්ෂණ (Week Test)',
+        'Month Test': 'මාසික පරීක්ෂණ (Month Test)',
+        'Full Papers': 'සම්පූර්ණ පත්‍ර (Full Papers)',
+        Tutes: 'නිබන්ධන (Tutes)',
+      },
     },
     assignment: {
       backToPapers: 'ප්‍රශ්න පත්‍ර වෙත ආපසු',
@@ -421,6 +469,7 @@ export const TRANSLATIONS = {
       heading: 'නව විභාග ප්‍රශ්න පත්‍රයක් එක් කරන්න',
       paperTitleLabel: 'ප්‍රශ්න පත්‍රයේ නම',
       paperTitlePlaceholder: 'උදා: ආදර්ශ ප්‍රශ්න පත්‍රය 03 - ශුද්ධ ගණිතය',
+      sectionLabel: 'ප්‍රශ්න පත්‍ර අංශය (Section)',
       subjectStreamLabel: 'විෂය කොටස',
       streamPure: 'ශුද්ධ ගණිතය (Pure Mathematics)',
       streamApplied: 'ව්‍යවහාරික ගණිතය (Applied Mathematics)',
@@ -464,3 +513,4 @@ export function translateBackendError(message, lang, fallbackMessage) {
   }
   return message;
 }
+

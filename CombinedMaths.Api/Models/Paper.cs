@@ -6,6 +6,7 @@ public class Paper
     public string Code { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Subject { get; set; } = string.Empty;
+    public string Section { get; set; } = "Full Papers";
     public string CourseName { get; set; } = "Combined Mathematics 2026 (A/L)";
     public int DurationMinutes { get; set; }
     public int GracePeriodMinutes { get; set; } = 15;

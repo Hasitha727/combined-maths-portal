@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from './services/api';
-import { TRANSLATIONS, translateBackendError } from './translations';
+import { PAPER_SECTIONS, TRANSLATIONS, translateBackendError } from './translations';
 import { 
   FileText, 
   UploadCloud, 
@@ -25,7 +25,12 @@ import {
   GraduationCap, 
   Lock, 
   Unlock,
-  Globe
+  Globe,
+  LayoutGrid,
+  ClipboardList,
+  Flame,
+  Calendar,
+  CalendarRange
 } from 'lucide-react';
 
 // ---------------------------------------------------------------------------------
@@ -43,6 +48,39 @@ const PRESET_USERS = {
     email: 'teacher@maths.lk',
     initials: 'KP'
   }
+};
+
+const getPaperSection = (paper) => {
+  const raw = paper?.section;
+  if (!raw) return 'Full Papers';
+  return PAPER_SECTIONS.find(s => s.toLowerCase() === raw.toLowerCase()) || raw;
+};
+
+const SECTION_STYLES = {
+  'Home Work Assignment': {
+    Icon: ClipboardList,
+    badgeClass: 'bg-sky-500/10 text-sky-300 border-sky-500/25',
+  },
+  'Challenge Papers': {
+    Icon: Flame,
+    badgeClass: 'bg-orange-500/10 text-orange-300 border-orange-500/25',
+  },
+  'Week Test': {
+    Icon: Calendar,
+    badgeClass: 'bg-blue-500/10 text-blue-300 border-blue-500/25',
+  },
+  'Month Test': {
+    Icon: CalendarRange,
+    badgeClass: 'bg-violet-500/10 text-violet-300 border-violet-500/25',
+  },
+  'Full Papers': {
+    Icon: FileText,
+    badgeClass: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25',
+  },
+  Tutes: {
+    Icon: BookOpen,
+    badgeClass: 'bg-amber-500/10 text-amber-300 border-amber-500/25',
+  },
 };
 
 function LanguageToggle({ lang, setLang, fullLabels = false, title = 'Select Language' }) {
@@ -116,6 +154,7 @@ export default function App() {
   // Navigation: 'courses' | 'assignment' | 'teacher_grading'
   const [activeView, setActiveView] = useState('courses');
   const [selectedPaperId, setSelectedPaperId] = useState(null);
+  const [selectedSection, setSelectedSection] = useState('ALL');
 
   // Modals & UI States
   const [showConfirmStartModal, setShowConfirmStartModal] = useState(false);
@@ -239,6 +278,7 @@ export default function App() {
     setActiveSession(null);
     setShowUserDropdown(false);
     setActiveView('courses');
+    setSelectedSection('ALL');
     showToast(t.toasts.loggedOut, 'info');
   };
 
@@ -362,11 +402,13 @@ export default function App() {
 
   // Teacher Adds New Paper
   const handleCreatePaper = async (newPaperData) => {
+    const targetSection = newPaperData.section || 'Full Papers';
     let savedPaper = null;
     try {
       savedPaper = await api.createPaper({
         title: newPaperData.title,
         subject: newPaperData.subject,
+        section: targetSection,
         durationMinutes: Number(newPaperData.durationMinutes),
         gracePeriodMinutes: Number(newPaperData.gracePeriodMinutes || 15),
         dueDate: newPaperData.dueDate,
@@ -385,6 +427,7 @@ export default function App() {
       code: `CM-26-P${papers.length + 1}`,
       title: newPaperData.title,
       subject: newPaperData.subject,
+      section: targetSection,
       courseName: 'Combined Mathematics 2026 (A/L)',
       durationMinutes: Number(newPaperData.durationMinutes),
       gracePeriodMinutes: Number(newPaperData.gracePeriodMinutes || 15),
@@ -397,7 +440,11 @@ export default function App() {
       totalMarks: Number(newPaperData.totalMarks || 100)
     };
 
+    const createdSection = getPaperSection(newPaper);
     setPapers([newPaper, ...papers]);
+    if (selectedSection !== 'ALL' && selectedSection !== createdSection) {
+      setSelectedSection(createdSection);
+    }
     setShowAddPaperModal(false);
     showToast(t.toasts.paperCreated, 'success');
   };
@@ -561,6 +608,8 @@ export default function App() {
             papers={papers}
             currentUser={currentUser}
             submissions={submissions}
+            selectedSection={selectedSection}
+            onSelectSection={setSelectedSection}
             t={t}
             onSelectPaper={(paperId) => {
               setSelectedPaperId(paperId);
@@ -606,6 +655,8 @@ export default function App() {
             papers={papers}
             currentUser={currentUser}
             submissions={submissions}
+            selectedSection={selectedSection}
+            onSelectSection={setSelectedSection}
             t={t}
             onSelectPaper={(paperId) => {
               setSelectedPaperId(paperId);
@@ -675,6 +726,7 @@ export default function App() {
       {showAddPaperModal && (
         <MoodleCreatePaperModal 
           t={t}
+          defaultSection={selectedSection === 'ALL' ? 'Full Papers' : selectedSection}
           onSave={handleCreatePaper}
           onClose={() => setShowAddPaperModal(false)}
         />
@@ -1021,9 +1073,35 @@ function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
 }
 
 // ---------------------------------------------------------------------------------
-// 2. COURSES / PAPERS LIST VIEW
+// 2. COURSES / PAPERS LIST VIEW (With Section Sidebar Navigation)
 // ---------------------------------------------------------------------------------
-function MoodleCoursesView({ papers, currentUser, submissions, t, onSelectPaper, onDeletePaper, onOpenGrading, onOpenAddPaperModal }) {
+function MoodleCoursesView({
+  papers,
+  currentUser,
+  submissions,
+  selectedSection,
+  onSelectSection,
+  t,
+  onSelectPaper,
+  onDeletePaper,
+  onOpenGrading,
+  onOpenAddPaperModal,
+}) {
+  const filteredPapers =
+    selectedSection === 'ALL'
+      ? papers
+      : papers.filter((p) => getPaperSection(p) === selectedSection);
+
+  const activeSectionLabel =
+    selectedSection === 'ALL'
+      ? t.courses.allSectionTitle
+      : t.sections.items[selectedSection] || selectedSection;
+
+  const ActiveHeaderIcon =
+    selectedSection === 'ALL'
+      ? LayoutGrid
+      : SECTION_STYLES[selectedSection]?.Icon || BookOpen;
+
   return (
     <div className="space-y-6">
       {/* Course Banner */}
@@ -1051,122 +1129,249 @@ function MoodleCoursesView({ papers, currentUser, submissions, t, onSelectPaper,
         )}
       </div>
 
-      {/* Papers Table */}
-      <div className="bg-[#111827] rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
-        <div className="p-4 md:px-6 border-b border-slate-800 bg-[#0c1222] flex items-center justify-between">
-          <h3 className="font-bold text-sm text-slate-200 flex items-center space-x-2.5">
-            <BookOpen className="w-4 h-4 text-blue-400" />
-            <span>{t.courses.sectionTitle}</span>
-          </h3>
-          <span className="text-xs text-slate-400 font-mono px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/60">
-            {t.courses.papersActive(papers.length)}
-          </span>
-        </div>
-
-        {papers.length === 0 ? (
-          <div className="p-12 md:p-16 text-center space-y-3.5">
-            <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700/80 text-slate-400 mx-auto flex items-center justify-center">
-              <BookOpen className="w-7 h-7 text-blue-400" />
-            </div>
-            <div>
-              <h4 className="font-bold text-base text-slate-200">{t.courses.emptyTitle}</h4>
-              <p className="text-xs text-slate-400 mt-1.5 max-w-md mx-auto leading-relaxed">
-                {currentUser.role === 'teacher' 
-                  ? t.courses.emptyTeacherDesc 
-                  : t.courses.emptyStudentDesc}
-              </p>
-            </div>
-            {currentUser.role === 'teacher' && (
-              <button
-                onClick={onOpenAddPaperModal}
-                className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-md shadow-blue-600/25 mt-2"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>{t.courses.addModelPaperBtn}</span>
-              </button>
-            )}
+      {/* Sidebar + Papers Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Sidebar: Class Sections */}
+        <aside className="lg:col-span-4 bg-[#111827] rounded-2xl border border-slate-800 shadow-xl overflow-hidden lg:sticky lg:top-20">
+          <div className="p-4 border-b border-slate-800 bg-[#0c1222] flex items-center justify-between">
+            <h3 className="font-bold text-sm text-slate-200 flex items-center space-x-2">
+              <Layers className="w-4 h-4 text-blue-400" />
+              <span>{t.sections.sidebarTitle}</span>
+            </h3>
+            <span className="text-[11px] font-mono text-slate-400">
+              {PAPER_SECTIONS.length}
+            </span>
           </div>
-        ) : (
-          <div className="divide-y divide-slate-800/80">
-            {papers.map((paper) => {
-              const studentSub = submissions.find(
-                s => s.paperId === paper.id && s.studentIndex === currentUser.indexNo
-              );
+
+          <nav
+            className="p-2.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-1.5"
+            aria-label={t.sections.sidebarTitle}
+          >
+            {/* All Sections */}
+            <button
+              type="button"
+              onClick={() => onSelectSection('ALL')}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition border text-left col-span-2 sm:col-span-3 lg:col-span-1 ${
+                selectedSection === 'ALL'
+                  ? 'bg-blue-600/20 text-blue-300 border-blue-500/40 shadow-xs'
+                  : 'text-slate-300 border-transparent hover:bg-slate-800/60 hover:text-slate-100'
+              }`}
+            >
+              <span className="flex items-center space-x-2.5 min-w-0">
+                <LayoutGrid
+                  className={`w-4 h-4 shrink-0 ${
+                    selectedSection === 'ALL' ? 'text-blue-400' : 'text-slate-400'
+                  }`}
+                />
+                <span className="truncate">{t.sections.allSections}</span>
+              </span>
+              <span
+                className={`ml-2 px-2 py-0.5 rounded-md font-mono text-[11px] shrink-0 ${
+                  selectedSection === 'ALL'
+                    ? 'bg-blue-500/25 text-blue-200'
+                    : 'bg-slate-800 text-slate-400'
+                }`}
+              >
+                {papers.length}
+              </span>
+            </button>
+
+            <div className="hidden lg:block my-1 border-t border-slate-800/80" />
+
+            {/* 6 Individual Sections */}
+            {PAPER_SECTIONS.map((sec) => {
+              const count = papers.filter((p) => getPaperSection(p) === sec).length;
+              const isSelected = selectedSection === sec;
+              const IconComp = SECTION_STYLES[sec]?.Icon || FileText;
+              const label = t.sections.items[sec] || sec;
 
               return (
-                <div 
-                  key={paper.id} 
-                  className="p-5 md:px-6 hover:bg-[#161f38]/40 transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group"
+                <button
+                  key={sec}
+                  type="button"
+                  onClick={() => onSelectSection(sec)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition border text-left ${
+                    isSelected
+                      ? 'bg-blue-600/20 text-blue-300 border-blue-500/40 shadow-xs'
+                      : 'text-slate-300 border-transparent hover:bg-slate-800/60 hover:text-slate-100'
+                  }`}
                 >
-                  <div 
-                    className="flex items-start space-x-3.5 cursor-pointer flex-1"
-                    onClick={() => onSelectPaper(paper.id)}
+                  <span className="flex items-center space-x-2.5 min-w-0">
+                    <IconComp
+                      className={`w-4 h-4 shrink-0 ${
+                        isSelected ? 'text-blue-400' : 'text-slate-400'
+                      }`}
+                    />
+                    <span className="truncate">{label}</span>
+                  </span>
+                  <span
+                    className={`ml-2 px-2 py-0.5 rounded-md font-mono text-[11px] shrink-0 ${
+                      isSelected
+                        ? 'bg-blue-500/25 text-blue-200'
+                        : count > 0
+                        ? 'bg-slate-800 text-slate-300'
+                        : 'bg-slate-900 text-slate-500'
+                    }`}
                   >
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 mt-0.5 group-hover:scale-105 transition">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm text-blue-400 group-hover:text-blue-300 flex items-center gap-2">
-                        <span>{paper.title}</span>
-                        <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
-                          {paper.code}
-                        </span>
-                      </h4>
-                      <p className="text-xs text-slate-400 mt-1 line-clamp-1">{paper.instructions}</p>
-                      <div className="flex items-center space-x-3 text-[11px] text-slate-400 mt-2 flex-wrap gap-y-1">
-                        <span>{t.courses.durationLabel} <b className="text-slate-200 font-mono">{t.common.minsUnit(paper.durationMinutes)}</b></span>
-                        <span>&bull;</span>
-                        <span>{t.courses.graceLabel} <b className="text-slate-200 font-mono">+{t.common.minsUnit(paper.gracePeriodMinutes)}</b></span>
-                        <span>&bull;</span>
-                        <span>{t.courses.dueLabel} <b className="text-slate-300">{paper.dueDate}</b></span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2.5 self-end md:self-center shrink-0">
-                    {currentUser.role === 'student' ? (
-                      studentSub ? (
-                        <button
-                          onClick={() => onSelectPaper(paper.id)}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition font-mono"
-                        >
-                          {studentSub.marks !== null ? t.courses.gradedBadge(studentSub.marks, paper.totalMarks) : t.courses.submittedBadge}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => onSelectPaper(paper.id)}
-                          className="text-xs font-semibold px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition shadow-md shadow-blue-600/20 flex items-center space-x-1.5"
-                        >
-                          <span>{t.courses.startExamBtn}</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </button>
-                      )
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => onOpenGrading(paper.id)}
-                          className="text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg border border-blue-500/20 transition"
-                        >
-                          {t.courses.submissionsAndGradeBtn}
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeletePaper(paper.id);
-                          }}
-                          title={t.courses.deletePaperTitle}
-                          className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition border border-transparent hover:border-rose-500/20"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                    {count}
+                  </span>
+                </button>
               );
             })}
+          </nav>
+        </aside>
+
+        {/* Right Content: Filtered Papers Table */}
+        <section className="lg:col-span-8 bg-[#111827] rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+          <div className="p-4 md:px-6 border-b border-slate-800 bg-[#0c1222] flex items-center justify-between gap-3 flex-wrap">
+            <h3 className="font-bold text-sm text-slate-200 flex items-center space-x-2.5">
+              <ActiveHeaderIcon className="w-4 h-4 text-blue-400 shrink-0" />
+              <span>{activeSectionLabel}</span>
+            </h3>
+            <span className="text-xs text-slate-400 font-mono px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/60">
+              {t.courses.papersActive(filteredPapers.length)}
+            </span>
           </div>
-        )}
+
+          {filteredPapers.length === 0 ? (
+            <div className="p-12 md:p-16 text-center space-y-3.5">
+              <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700/80 text-slate-400 mx-auto flex items-center justify-center">
+                <ActiveHeaderIcon className="w-7 h-7 text-blue-400" />
+              </div>
+              <div>
+                <h4 className="font-bold text-base text-slate-200">
+                  {selectedSection === 'ALL'
+                    ? t.courses.emptyTitle
+                    : t.courses.emptyInSectionTitle(activeSectionLabel)}
+                </h4>
+                <p className="text-xs text-slate-400 mt-1.5 max-w-md mx-auto leading-relaxed">
+                  {selectedSection === 'ALL'
+                    ? currentUser.role === 'teacher'
+                      ? t.courses.emptyTeacherDesc
+                      : t.courses.emptyStudentDesc
+                    : currentUser.role === 'teacher'
+                    ? t.courses.emptyInSectionTeacherDesc(activeSectionLabel)
+                    : t.courses.emptyInSectionStudentDesc(activeSectionLabel)}
+                </p>
+              </div>
+              {currentUser.role === 'teacher' && (
+                <button
+                  onClick={onOpenAddPaperModal}
+                  className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-md shadow-blue-600/25 mt-2"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>{t.courses.addModelPaperBtn}</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-800/80">
+              {filteredPapers.map((paper) => {
+                const studentSub = submissions.find(
+                  (s) => s.paperId === paper.id && s.studentIndex === currentUser.indexNo
+                );
+                const secKey = getPaperSection(paper);
+                const secBadgeStyle =
+                  SECTION_STYLES[secKey]?.badgeClass ||
+                  'bg-slate-800 text-slate-300 border-slate-700';
+                const secLabel = t.sections.items[secKey] || secKey;
+
+                return (
+                  <div
+                    key={paper.id}
+                    className="p-5 md:px-6 hover:bg-[#161f38]/40 transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group"
+                  >
+                    <div
+                      className="flex items-start space-x-3.5 cursor-pointer flex-1 min-w-0"
+                      onClick={() => onSelectPaper(paper.id)}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 mt-0.5 group-hover:scale-105 transition">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-sm text-blue-400 group-hover:text-blue-300 flex items-center gap-2 flex-wrap">
+                          <span>{paper.title}</span>
+                          <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                            {paper.code}
+                          </span>
+                          <span
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${secBadgeStyle}`}
+                          >
+                            {secLabel}
+                          </span>
+                        </h4>
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-1">
+                          {paper.instructions}
+                        </p>
+                        <div className="flex items-center space-x-3 text-[11px] text-slate-400 mt-2 flex-wrap gap-y-1">
+                          <span>
+                            {t.courses.durationLabel}{' '}
+                            <b className="text-slate-200 font-mono">
+                              {t.common.minsUnit(paper.durationMinutes)}
+                            </b>
+                          </span>
+                          <span>&bull;</span>
+                          <span>
+                            {t.courses.graceLabel}{' '}
+                            <b className="text-slate-200 font-mono">
+                              +{t.common.minsUnit(paper.gracePeriodMinutes)}
+                            </b>
+                          </span>
+                          <span>&bull;</span>
+                          <span>
+                            {t.courses.dueLabel} <b className="text-slate-300">{paper.dueDate}</b>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2.5 self-end md:self-center shrink-0">
+                      {currentUser.role === 'student' ? (
+                        studentSub ? (
+                          <button
+                            onClick={() => onSelectPaper(paper.id)}
+                            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition font-mono"
+                          >
+                            {studentSub.marks !== null
+                              ? t.courses.gradedBadge(studentSub.marks, paper.totalMarks)
+                              : t.courses.submittedBadge}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => onSelectPaper(paper.id)}
+                            className="text-xs font-semibold px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition shadow-md shadow-blue-600/20 flex items-center space-x-1.5"
+                          >
+                            <span>{t.courses.startExamBtn}</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        )
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => onOpenGrading(paper.id)}
+                            className="text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg border border-blue-500/20 transition"
+                          >
+                            {t.courses.submissionsAndGradeBtn}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeletePaper(paper.id);
+                            }}
+                            title={t.courses.deletePaperTitle}
+                            className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition border border-transparent hover:border-rose-500/20"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
@@ -1381,6 +1586,14 @@ function MoodleExamAssignmentView({
         
         {/* Meta Info */}
         <div className="text-xs text-slate-400 space-y-1.5 pb-5 border-b border-slate-800">
+          <div>
+            <b>{t.sections.sectionLabel}</b>{' '}
+            <span className={`inline-block text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
+              SECTION_STYLES[getPaperSection(paper)]?.badgeClass || 'bg-slate-800 text-slate-300 border-slate-700'
+            }`}>
+              {t.sections.items[getPaperSection(paper)] || getPaperSection(paper)}
+            </span>
+          </div>
           <div><b>{t.assignment.openedLabel}</b> <span className="text-slate-300">{paper.openedDate}</span></div>
           <div><b>{t.assignment.dueLabel}</b> <span className="text-slate-300">{paper.dueDate}</span></div>
           <div className="text-blue-400">
@@ -1932,8 +2145,11 @@ function MoodleTeacherGradingView({ paper, papers, submissions, t, onSelectPaper
 // ---------------------------------------------------------------------------------
 // 5. CREATE PAPER MODAL (Teacher Uploads Question Paper PDF)
 // ---------------------------------------------------------------------------------
-function MoodleCreatePaperModal({ t, onSave, onClose }) {
+function MoodleCreatePaperModal({ t, defaultSection = 'Full Papers', onSave, onClose }) {
   const [title, setTitle] = useState('');
+  const [section, setSection] = useState(
+    PAPER_SECTIONS.includes(defaultSection) ? defaultSection : 'Full Papers'
+  );
   const [subject, setSubject] = useState('Pure Mathematics');
   const [durationMinutes, setDurationMinutes] = useState('180');
   const [gracePeriodMinutes, setGracePeriodMinutes] = useState('15');
@@ -1971,6 +2187,7 @@ function MoodleCreatePaperModal({ t, onSave, onClose }) {
 
     onSave({
       title,
+      section,
       subject,
       durationMinutes,
       gracePeriodMinutes,
@@ -1983,7 +2200,7 @@ function MoodleCreatePaperModal({ t, onSave, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-      <div className="bg-[#111827] rounded-2xl border border-slate-800 max-w-lg w-full p-6 md:p-7 space-y-5 shadow-2xl">
+      <div className="bg-[#111827] rounded-2xl border border-slate-800 max-w-lg w-full p-6 md:p-7 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
           <h3 className="text-base font-bold text-slate-100 tracking-tight">
             {t.createPaperModal.heading}
@@ -2002,6 +2219,21 @@ function MoodleCreatePaperModal({ t, onSave, onClose }) {
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs bg-[#090d16] text-slate-100 placeholder-slate-500 transition"
             />
+          </div>
+
+          <div>
+            <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.sectionLabel}</label>
+            <select
+              value={section}
+              onChange={(e) => setSection(e.target.value)}
+              className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs bg-[#090d16] text-slate-100 font-medium transition"
+            >
+              {PAPER_SECTIONS.map((sec) => (
+                <option key={sec} value={sec}>
+                  {t.sections.items[sec] || sec}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
