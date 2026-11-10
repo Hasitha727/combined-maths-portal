@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<Paper> Papers => Set<Paper>();
     public DbSet<Submission> Submissions => Set<Submission>();
     public DbSet<ExamSession> ExamSessions => Set<ExamSession>();
+    public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +23,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Paper>().HasKey(p => p.Id);
         modelBuilder.Entity<Submission>().HasKey(s => s.Id);
         modelBuilder.Entity<ExamSession>().HasKey(e => e.Id);
+        modelBuilder.Entity<StoredFile>().HasKey(f => f.Id);
     }
 }
 

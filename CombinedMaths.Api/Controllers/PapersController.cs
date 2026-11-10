@@ -39,6 +39,7 @@ public class PapersController : ControllerBase
     public async Task<ActionResult<Paper>> CreatePaper([FromBody] CreatePaperRequest request)
     {
         var count = await _context.Papers.CountAsync();
+        var slTime = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(5.5));
         var paper = new Paper
         {
             Id = $"paper-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
@@ -48,8 +49,8 @@ public class PapersController : ControllerBase
             CourseName = "Combined Mathematics 2026 (A/L)",
             DurationMinutes = request.DurationMinutes,
             GracePeriodMinutes = request.GracePeriodMinutes > 0 ? request.GracePeriodMinutes : 15,
-            OpenedDate = DateTime.Now.ToString("dddd, d MMMM yyyy, h:mm tt"),
-            DueDate = !string.IsNullOrWhiteSpace(request.DueDate) ? request.DueDate : DateTime.Now.AddDays(7).ToString("dddd, d MMMM yyyy, 11:59 PM"),
+            OpenedDate = slTime.ToString("dddd, d MMMM yyyy, h:mm tt"),
+            DueDate = !string.IsNullOrWhiteSpace(request.DueDate) ? request.DueDate : slTime.AddDays(7).ToString("dddd, d MMMM yyyy, 11:59 PM"),
             PdfUrl = !string.IsNullOrWhiteSpace(request.PdfUrl) ? request.PdfUrl : "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
             PdfFileName = !string.IsNullOrWhiteSpace(request.PdfFileName) ? request.PdfFileName : "Model_Paper.pdf",
             PdfFileSize = "2.5 MB",
@@ -72,8 +73,29 @@ public class PapersController : ControllerBase
             return NotFound();
         }
 
-        // Also delete any submissions or exam sessions associated with this paper
+        // Also delete any submissions, exam sessions, or stored files associated with this paper
         var submissions = await _context.Submissions.Where(s => s.PaperId == id).ToListAsync();
+        var fileIdsToDelete = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(paper.PdfUrl) && paper.PdfUrl.StartsWith("/api/files/"))
+        {
+            fileIdsToDelete.Add(paper.PdfUrl.Substring("/api/files/".Length).Split('?')[0]);
+        }
+
+        foreach (var sub in submissions)
+        {
+            if (!string.IsNullOrWhiteSpace(sub.FilePath) && sub.FilePath.StartsWith("/api/files/"))
+            {
+                fileIdsToDelete.Add(sub.FilePath.Substring("/api/files/".Length).Split('?')[0]);
+            }
+        }
+
+        if (fileIdsToDelete.Count > 0)
+        {
+            var files = await _context.StoredFiles.Where(f => fileIdsToDelete.Contains(f.Id)).ToListAsync();
+            _context.StoredFiles.RemoveRange(files);
+        }
+
         _context.Submissions.RemoveRange(submissions);
 
         var sessions = await _context.ExamSessions.Where(s => s.PaperId == id).ToListAsync();

@@ -92,7 +92,8 @@ public class SubmissionsController : ControllerBase
         submission.StudentName = request.StudentName;
         submission.StudentIndex = request.StudentIndex;
         submission.StudentEmail = request.StudentEmail;
-        submission.SubmittedAt = DateTime.Now.ToString("dddd, d MMMM yyyy, h:mm tt");
+        var slTime = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(5.5));
+        submission.SubmittedAt = slTime.ToString("dddd, d MMMM yyyy, h:mm tt");
         submission.Status = status;
         submission.DurationTakenMins = durationTaken;
         submission.FileName = request.FileName;

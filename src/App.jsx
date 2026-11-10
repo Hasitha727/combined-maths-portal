@@ -1384,8 +1384,8 @@ function MoodleExamAssignmentView({
                       <span>Open in New Tab</span>
                     </button>
                     <a
-                      href={paper.pdfUrl}
-                      download
+                      href={`${paper.pdfUrl}${paper.pdfUrl?.includes('/api/files/') ? '?download=true' : ''}`}
+                      download={paper.pdfFileName || 'question-paper.pdf'}
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"

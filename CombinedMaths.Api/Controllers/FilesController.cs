@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
+using CombinedMaths.Api.Data;
 using CombinedMaths.Api.DTOs;
+using CombinedMaths.Api.Models;
 
 namespace CombinedMaths.Api.Controllers;
 
@@ -7,11 +10,11 @@ namespace CombinedMaths.Api.Controllers;
 [Route("api/[controller]")]
 public class FilesController : ControllerBase
 {
-    private readonly IWebHostEnvironment _env;
+    private readonly AppDbContext _context;
 
-    public FilesController(IWebHostEnvironment env)
+    public FilesController(AppDbContext context)
     {
-        _env = env;
+        _context = context;
     }
 
     [HttpPost("upload")]
@@ -32,31 +35,57 @@ public class FilesController : ControllerBase
             return BadRequest(new { message = "Only PDF, PNG, and JPG files are supported." });
         }
 
-        // Create folder inside wwwroot/uploads/{folder}
-        var uploadsDir = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", folder);
-        if (!Directory.Exists(uploadsDir))
+        var contentType = ext switch
         {
-            Directory.CreateDirectory(uploadsDir);
-        }
+            ".pdf" => "application/pdf",
+            ".png" => "image/png",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".webp" => "image/webp",
+            _ => "application/octet-stream"
+        };
 
-        // Generate unique filename
-        var safeOriginalName = Path.GetFileNameWithoutExtension(file.FileName).Replace(" ", "_");
-        var uniqueFileName = $"{safeOriginalName}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{ext}";
-        var physicalPath = Path.Combine(uploadsDir, uniqueFileName);
+        using var memoryStream = new MemoryStream();
+        await file.CopyToAsync(memoryStream);
+        var bytes = memoryStream.ToArray();
 
-        using (var stream = new FileStream(physicalPath, FileMode.Create))
+        var fileId = $"file-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{Guid.NewGuid().ToString("N")[..8]}";
+        var storedFile = new StoredFile
         {
-            await file.CopyToAsync(stream);
-        }
+            Id = fileId,
+            FileName = file.FileName,
+            ContentType = contentType,
+            Folder = string.IsNullOrWhiteSpace(folder) ? "general" : folder,
+            Data = bytes,
+            SizeBytes = bytes.LongLength,
+            CreatedAt = DateTime.UtcNow
+        };
 
-        var fileSizeMb = $"{Math.Round((double)file.Length / (1024 * 1024), 2)} MB";
-        var fileUrl = $"/uploads/{folder}/{uniqueFileName}";
+        _context.StoredFiles.Add(storedFile);
+        await _context.SaveChangesAsync();
+
+        var fileSizeMb = $"{Math.Round((double)bytes.LongLength / (1024 * 1024), 2)} MB";
+        var fileUrl = $"/api/files/{storedFile.Id}";
 
         return Ok(new UploadResultDto(
-            FileName: file.FileName,
+            FileName: storedFile.FileName,
             FileUrl: fileUrl,
             FileSizeMb: fileSizeMb
         ));
     }
-}
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetFile(string id, [FromQuery] bool download = false)
+    {
+        var storedFile = await _context.StoredFiles.FindAsync(id);
+        if (storedFile == null)
+        {
+            return NotFound(new { message = "File not found." });
+        }
+
+        var contentDisposition = new ContentDispositionHeaderValue(download ? "attachment" : "inline");
+        contentDisposition.SetHttpFileName(storedFile.FileName);
+        Response.Headers["Content-Disposition"] = contentDisposition.ToString();
+
+        return File(storedFile.Data, storedFile.ContentType, enableRangeProcessing: true);
+    }
+}
