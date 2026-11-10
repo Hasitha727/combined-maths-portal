@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from './services/api';
+import { TRANSLATIONS, translateBackendError } from './translations';
 import { 
   FileText, 
   UploadCloud, 
@@ -23,7 +24,8 @@ import {
   ShieldAlert, 
   GraduationCap, 
   Lock, 
-  Unlock 
+  Unlock,
+  Globe
 } from 'lucide-react';
 
 // ---------------------------------------------------------------------------------
@@ -43,7 +45,51 @@ const PRESET_USERS = {
   }
 };
 
+function LanguageToggle({ lang, setLang, fullLabels = false, title = 'Select Language' }) {
+  return (
+    <div
+      className="inline-flex items-center p-0.5 rounded-lg bg-[#090d16] border border-slate-800 text-[11px] font-semibold shrink-0"
+      role="group"
+      aria-label={title}
+      title={title}
+    >
+      <span className="pl-2 pr-1 text-slate-400 flex items-center">
+        <Globe className="w-3.5 h-3.5" />
+      </span>
+      <button
+        type="button"
+        onClick={() => setLang('en')}
+        className={`px-2 py-1 rounded-md transition ${
+          lang === 'en'
+            ? 'bg-blue-600 text-white shadow-xs'
+            : 'text-slate-400 hover:text-slate-200'
+        }`}
+      >
+        {fullLabels ? 'English' : 'EN'}
+      </button>
+      <button
+        type="button"
+        onClick={() => setLang('si')}
+        className={`px-2 py-1 rounded-md transition ${
+          lang === 'si'
+            ? 'bg-blue-600 text-white shadow-xs'
+            : 'text-slate-400 hover:text-slate-200'
+        }`}
+      >
+        {fullLabels ? 'සිංහල' : 'සිං'}
+      </button>
+    </div>
+  );
+}
+
 export default function App() {
+  // Language State (Default: English 'en', Secondary: Sinhala 'si')
+  const [lang, setLang] = useState(() => {
+    const saved = localStorage.getItem('cm_portal_lang');
+    return saved === 'si' ? 'si' : 'en';
+  });
+  const t = TRANSLATIONS[lang];
+
   // Authentication State
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('cm_moodle_user');
@@ -105,7 +151,7 @@ export default function App() {
   }, []);
 
   const handleDeletePaper = async (paperId) => {
-    if (!window.confirm('මෙම ප්‍රශ්න පත්‍රය ස්ථිරවම මකා දැමීමට අවශ්‍ය බව සහතිකද? (Are you sure you want to delete this paper?)')) {
+    if (!window.confirm(t.confirms.deletePaper)) {
       return;
     }
     try {
@@ -119,10 +165,15 @@ export default function App() {
       setSelectedPaperId(null);
       setActiveView('courses');
     }
-    showToast('ප්‍රශ්න පත්‍රය සාර්ථකව මකා දමන ලදී (Paper deleted).', 'info');
+    showToast(t.toasts.paperDeleted, 'info');
   };
 
   // Sync with LocalStorage
+  useEffect(() => {
+    localStorage.setItem('cm_portal_lang', lang);
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem('cm_moodle_user', JSON.stringify(currentUser));
@@ -179,7 +230,8 @@ export default function App() {
   const handleLogin = (user) => {
     setCurrentUser(user);
     setActiveView('courses');
-    showToast(`Logged in as ${user.name} (${user.role.toUpperCase()})`, 'success');
+    const roleLabel = user.role === 'teacher' ? t.common.teacherRole : t.common.studentRole;
+    showToast(t.toasts.loggedInAs(user.name, roleLabel), 'success');
   };
 
   const handleLogout = () => {
@@ -187,7 +239,7 @@ export default function App() {
     setActiveSession(null);
     setShowUserDropdown(false);
     setActiveView('courses');
-    showToast('You have been logged out.', 'info');
+    showToast(t.toasts.loggedOut, 'info');
   };
 
   const currentPaper = papers.find(p => p.id === selectedPaperId) || papers[0] || null;
@@ -223,7 +275,7 @@ export default function App() {
 
     setActiveSession(sessionData);
     setShowConfirmStartModal(false);
-    showToast('විභාගය ආරම්භ විය! ප්‍රශ්න පත්‍රය විවෘත වූ අතර කාලය ගණනය වීම ආරම්භ විය.', 'warning');
+    showToast(t.toasts.examStarted, 'warning');
   };
 
   // Submit Answer Script
@@ -300,11 +352,11 @@ export default function App() {
     setActiveSession(null);
 
     if (newSub.status === 'ON_TIME') {
-      showToast('🎉 පිළිතුරු පත්‍රය නියමිත වේලාවට සාර්ථකව භාර දෙන ලදී (Submitted On Time)!', 'success');
+      showToast(t.toasts.submittedOnTime, 'success');
     } else if (newSub.status === 'LATE') {
-      showToast('⚠️ Grace period එක තුළ පිළිතුරු පත්‍රය ලැබුණි (Submitted Late).', 'warning');
+      showToast(t.toasts.submittedLate, 'warning');
     } else {
-      showToast('❌ නියමිත කාල සීමාව ඉක්මවා ගිය බැවින් Disqualified විය.', 'error');
+      showToast(t.toasts.submittedDisqualified, 'error');
     }
   };
 
@@ -341,18 +393,26 @@ export default function App() {
       pdfUrl: newPaperData.pdfUrl || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
       pdfFileName: newPaperData.pdfFileName || 'Model_Paper.pdf',
       pdfFileSize: '2.5 MB',
-      instructions: newPaperData.instructions || 'සියලුම ප්‍රශ්න වලට පිළිතුරු සපයන්න.',
+      instructions: newPaperData.instructions || t.createPaperModal.defaultInstructions,
       totalMarks: Number(newPaperData.totalMarks || 100)
     };
 
     setPapers([newPaper, ...papers]);
     setShowAddPaperModal(false);
-    showToast('නව ප්‍රශ්න පත්‍රය සාර්ථකව එක් කරන ලදී!', 'success');
+    showToast(t.toasts.paperCreated, 'success');
   };
 
   // If not logged in, show clean Moodle login
   if (!currentUser) {
-    return <MoodleLoginPage onLogin={handleLogin} presetUsers={PRESET_USERS} />;
+    return (
+      <MoodleLoginPage
+        onLogin={handleLogin}
+        presetUsers={PRESET_USERS}
+        lang={lang}
+        setLang={setLang}
+        t={t}
+      />
+    );
   }
 
   return (
@@ -383,24 +443,28 @@ export default function App() {
               <ShieldAlert className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-rose-300">අවවාදයයි: ඔබ විභාග පිටුවෙන් ඉවත් විය!</h3>
+              <h3 className="text-base font-bold text-rose-300">{t.tabSwitchModal.title}</h3>
               <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-                විභාගය අතරතුර වෙනත් Tabs හෝ Apps වලට මාරුවීම ගණනය කෙරේ. දැනට ඔබ <b className="text-rose-400 font-mono">{activeSession.tabSwitches || 1} වතාවක්</b> පිටුවෙන් ඉවත් වී ඇත. මෙම තොරතුර ගුරුවරයාට වාර්තා වේ.
+                {t.tabSwitchModal.beforeCount}
+                <b className="text-rose-400 font-mono">
+                  {t.tabSwitchModal.countText(activeSession.tabSwitches || 1)}
+                </b>
+                {t.tabSwitchModal.afterCount}
               </p>
             </div>
             <button
               onClick={() => setTabSwitchAlert(false)}
               className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition"
             >
-              තේරුම් ගත්තා (ආපසු විභාගයට)
+              {t.tabSwitchModal.dismiss}
             </button>
           </div>
         </div>
       )}
 
       {/* Top Navbar */}
-      <header className="bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40 px-4 md:px-6 py-2.5 flex items-center justify-between">
-        <div className="flex items-center space-x-3 md:space-x-4">
+      <header className="bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40 px-4 md:px-6 py-2.5 flex items-center justify-between gap-2">
+        <div className="flex items-center space-x-3 md:space-x-4 min-w-0">
           <div 
             onClick={() => setActiveView('courses')}
             className="flex items-center space-x-2.5 cursor-pointer group"
@@ -408,11 +472,13 @@ export default function App() {
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-500 flex items-center justify-center text-slate-900 border border-amber-400/30 shadow-md shadow-amber-500/10 shrink-0 group-hover:scale-105 transition">
               <GraduationCap className="w-5 h-5 text-slate-950" />
             </div>
-            <div>
-              <span className="font-bold text-sm text-slate-100 block leading-tight tracking-tight">
-                Combined Mathematics
+            <div className="min-w-0">
+              <span className="font-bold text-sm text-slate-100 block leading-tight tracking-tight truncate">
+                {t.common.courseTitle}
               </span>
-              <span className="text-[11px] text-slate-400 font-medium">2026 A/L Testing Portal</span>
+              <span className="text-[11px] text-slate-400 font-medium block truncate">
+                {t.common.portalSubtitle}
+              </span>
             </div>
           </div>
 
@@ -425,7 +491,7 @@ export default function App() {
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
               }`}
             >
-              ප්‍රශ්න පත්‍ර (Papers)
+              {t.nav.papers}
             </button>
             {currentUser.role === 'teacher' && (
               <button 
@@ -436,35 +502,42 @@ export default function App() {
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                 }`}
               >
-                ලකුණු ලබා දීම (Grading)
+                {t.nav.grading}
               </button>
             )}
           </div>
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-2 shrink-0">
           {currentUser.role === 'teacher' && (
             <button
               onClick={() => setShowAddPaperModal(true)}
               className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-md shadow-blue-600/20"
             >
               <PlusCircle className="w-3.5 h-3.5" />
-              <span>Add Model Paper</span>
+              <span>{t.nav.addModelPaper}</span>
             </button>
           )}
 
+          {/* Language Switcher */}
+          <LanguageToggle
+            lang={lang}
+            setLang={setLang}
+            title={t.nav.selectLanguage}
+          />
+
           {/* User Badge */}
-          <div className="flex items-center space-x-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs">
+          <div className="flex items-center space-x-2 px-2.5 sm:px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs">
             <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
               {currentUser.initials || 'ST'}
             </div>
-            <div className="text-left">
-              <span className="font-semibold text-slate-200 block leading-none">
+            <div className="text-left hidden xs:block sm:block">
+              <span className="font-semibold text-slate-200 block leading-none max-w-[110px] truncate">
                 {currentUser.name}
               </span>
               <span className="text-[10px] text-slate-400 font-mono">
-                {currentUser.role === 'student' ? (currentUser.indexNo || 'Student') : 'Teacher / Admin'}
+                {currentUser.role === 'student' ? (currentUser.indexNo || t.common.studentRole) : t.common.teacherRole}
               </span>
             </div>
           </div>
@@ -473,10 +546,10 @@ export default function App() {
           <button
             onClick={handleLogout}
             className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 text-xs font-medium transition flex items-center space-x-1"
-            title="Log out (පද්ධතියෙන් ඉවත් වන්න)"
+            title={t.nav.logoutTitle}
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Log out</span>
+            <span className="hidden md:inline">{t.nav.logout}</span>
           </button>
         </div>
       </header>
@@ -488,6 +561,7 @@ export default function App() {
             papers={papers}
             currentUser={currentUser}
             submissions={submissions}
+            t={t}
             onSelectPaper={(paperId) => {
               setSelectedPaperId(paperId);
               setActiveView('assignment');
@@ -505,12 +579,13 @@ export default function App() {
             currentUser={currentUser}
             submission={userSubmission}
             activeSession={activeSession && activeSession.paperId === currentPaper.id ? activeSession : null}
+            t={t}
             onRequestStartExam={() => setShowConfirmStartModal(true)}
             onSubmitAnswer={handleSubmitAnswer}
             onCancelExam={() => {
-              if (confirm('ඔබට සැබවින්ම විභාගයෙන් ඉවත් වීමට අවශ්‍යද?')) {
+              if (confirm(t.confirms.abandonExam)) {
                 setActiveSession(null);
-                showToast('විභාග සැසිය අවලංගු කරන ලදී.', 'info');
+                showToast(t.toasts.examCancelled, 'info');
               }
             }}
             onViewAllSubmissions={() => setActiveView('teacher_grading')}
@@ -521,6 +596,7 @@ export default function App() {
             paper={currentPaper}
             papers={papers}
             submissions={submissions.filter(s => s.paperId === currentPaper.id)}
+            t={t}
             onSelectPaper={(id) => setSelectedPaperId(id)}
             onGradeSubmission={(sub) => setGradingSubmission(sub)}
             onBack={() => setActiveView('assignment')}
@@ -530,6 +606,7 @@ export default function App() {
             papers={papers}
             currentUser={currentUser}
             submissions={submissions}
+            t={t}
             onSelectPaper={(paperId) => {
               setSelectedPaperId(paperId);
               setActiveView('assignment');
@@ -561,13 +638,17 @@ export default function App() {
             <div className="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs space-y-2 leading-relaxed">
               <div className="font-bold flex items-center space-x-1.5 text-amber-200">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>වැදගත් විභාග නිවේදනය (Exam Notice):</span>
+                <span>{t.startExamModal.heading}</span>
               </div>
               <p>
-                <b>"Start Exam & View Paper"</b> බොත්තම එබූ විගස පමණක් ප්‍රශ්න පත්‍රය විවෘත වන අතර ඔබගේ නියමිත ලිවීමේ කාලය <b className="font-mono">({currentPaper.durationMinutes} minutes)</b> ගණනය වීම ආරම්භ වේ.
+                {t.startExamModal.para1Before}
+                <b>{t.startExamModal.para1ButtonName}</b>
+                {t.startExamModal.para1Middle}
+                <b className="font-mono">{t.startExamModal.para1Duration(currentPaper.durationMinutes)}</b>
+                {t.startExamModal.para1After}
               </p>
               <p>
-                ලිවීම සඳහා විනාඩි {currentPaper.durationMinutes}ක් සහ පිළිතුරු upload කිරීමට අමතර <b>මිනිත්තු {currentPaper.gracePeriodMinutes}ක Grace Period</b> එකක් ලැබේ. Tab switches ගණනය වේ.
+                {t.startExamModal.para2(currentPaper.durationMinutes, currentPaper.gracePeriodMinutes)}
               </p>
             </div>
 
@@ -576,13 +657,13 @@ export default function App() {
                 onClick={() => setShowConfirmStartModal(false)}
                 className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"
               >
-                පසුබසින්න (Cancel)
+                {t.startExamModal.cancel}
               </button>
               <button
                 onClick={handleStartExam}
                 className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/20 flex items-center space-x-1.5 transition"
               >
-                <span>විභාගය අරඹා ප්‍රශ්න පත්‍රය බලන්න</span>
+                <span>{t.startExamModal.confirm}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -593,6 +674,7 @@ export default function App() {
       {/* Add Paper Modal (Teacher) */}
       {showAddPaperModal && (
         <MoodleCreatePaperModal 
+          t={t}
           onSave={handleCreatePaper}
           onClose={() => setShowAddPaperModal(false)}
         />
@@ -603,6 +685,7 @@ export default function App() {
         <MoodleGradeModal 
           submission={gradingSubmission}
           paper={currentPaper}
+          t={t}
           onSave={async (updatedSub) => {
             try {
               if (updatedSub.marks !== null) {
@@ -614,7 +697,7 @@ export default function App() {
             }
             setSubmissions(submissions.map(s => s.id === updatedSub.id ? updatedSub : s));
             setGradingSubmission(null);
-            showToast('Marks & feedback saved successfully.', 'success');
+            showToast(t.toasts.gradeSaved, 'success');
           }}
           onClose={() => setGradingSubmission(null)}
         />
@@ -623,8 +706,8 @@ export default function App() {
       {/* Clean Footer */}
       <footer className="bg-[#0b0f19] border-t border-slate-800/80 py-4 mt-auto text-center text-xs text-slate-400">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Combined Mathematics 2026 (A/L) &bull; Online Examination Portal</span>
-          <span>Logged in as <b className="text-slate-200">{currentUser.name}</b> {currentUser.indexNo ? <span className="font-mono text-slate-400">({currentUser.indexNo})</span> : ''}</span>
+          <span>{t.footer.portalInfo}</span>
+          <span>{t.footer.loggedInAs} <b className="text-slate-200">{currentUser.name}</b> {currentUser.indexNo ? <span className="font-mono text-slate-400">({currentUser.indexNo})</span> : ''}</span>
         </div>
       </footer>
     </div>
@@ -634,7 +717,7 @@ export default function App() {
 // ---------------------------------------------------------------------------------
 // 1. MOODLE LOGIN & REGISTRATION PAGE
 // ---------------------------------------------------------------------------------
-function MoodleLoginPage({ onLogin, presetUsers }) {
+function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
   
   // Login Form State
@@ -653,6 +736,12 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
   const [regError, setRegError] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
 
+  const resolveError = (errObj, fallback) => {
+    if (!errObj) return null;
+    if (errObj.type === 'key') return t.login[errObj.key];
+    return translateBackendError(errObj.message, lang, fallback);
+  };
+
   // Handle Real Login
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -669,7 +758,7 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
       if (matched && password === 'admin') {
         onLogin(matched);
       } else {
-        setLoginError(err.message || 'Invalid username or password. Please try again.');
+        setLoginError({ type: 'raw', message: err.message });
       }
     } finally {
       setIsLoggingIn(false);
@@ -682,12 +771,12 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
     setRegError(null);
 
     if (regPassword !== regConfirmPassword) {
-      setRegError('Passwords do not match! (මුරපද එකිනෙකට නොගැළපේ)');
+      setRegError({ type: 'key', key: 'passwordMismatch' });
       return;
     }
 
     if (regPassword.length < 4) {
-      setRegError('Password must be at least 4 characters long.');
+      setRegError({ type: 'key', key: 'passwordTooShort' });
       return;
     }
 
@@ -702,24 +791,36 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
       });
       onLogin(newUser);
     } catch (err) {
-      setRegError(err.message || 'Registration failed. Please check your details.');
+      setRegError({ type: 'raw', message: err.message });
     } finally {
       setIsRegistering(false);
     }
   };
 
+  const displayLoginError = resolveError(loginError, t.login.loginFallbackError);
+  const displayRegError = resolveError(regError, t.login.registerFallbackError);
+
   return (
     <div className="min-h-screen bg-[#0b0f19] flex flex-col justify-center items-center p-4 selection:bg-blue-600 selection:text-white">
       <div className="max-w-md w-full bg-[#111827] rounded-2xl border border-slate-800 shadow-2xl p-6 md:p-8 space-y-6">
+        <div className="flex justify-end -mt-1 -mb-2">
+          <LanguageToggle
+            lang={lang}
+            setLang={setLang}
+            fullLabels
+            title={t.nav.selectLanguage}
+          />
+        </div>
+
         <div className="text-center space-y-2.5">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-500 mx-auto flex items-center justify-center text-slate-950 border border-amber-400/40 shadow-lg shadow-amber-500/10">
             <GraduationCap className="w-9 h-9" />
           </div>
           <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
-            Combined Mathematics LMS
+            {t.login.title}
           </h1>
           <p className="text-xs text-slate-400 leading-relaxed">
-            A/L Combined Mathematics Online Testing & Examination Portal
+            {t.login.subtitle}
           </p>
         </div>
 
@@ -734,7 +835,7 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            Log in (ඇතුල් වන්න)
+            {t.login.loginTab}
           </button>
           <button
             type="button"
@@ -745,26 +846,26 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            New Student Register (ලියාපදිංචිය)
+            {t.login.registerTab}
           </button>
         </div>
 
         {/* LOGIN FORM */}
         {activeTab === 'login' && (
           <div className="space-y-4">
-            {loginError && (
+            {displayLoginError && (
               <div className="p-3 bg-rose-950/70 border border-rose-500/40 rounded-xl text-xs text-rose-300">
-                {loginError}
+                {displayLoginError}
               </div>
             )}
 
             <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">Email or Student Index No</label>
+                <label className="block text-slate-300 font-medium mb-1.5">{t.login.identifierLabel}</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. cm26089@student.maths.lk or CM-26-089"
+                  placeholder={t.login.identifierPlaceholder}
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
@@ -772,11 +873,11 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">Password</label>
+                <label className="block text-slate-300 font-medium mb-1.5">{t.login.passwordLabel}</label>
                 <input
                   type="password"
                   required
-                  placeholder="Enter password"
+                  placeholder={t.login.passwordPlaceholder}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
@@ -791,10 +892,10 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
                 {isLoggingIn ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Signing in...</span>
+                    <span>{t.login.signingIn}</span>
                   </>
                 ) : (
-                  <span>Log in (ඇතුල් වන්න)</span>
+                  <span>{t.login.loginButton}</span>
                 )}
               </button>
             </form>
@@ -809,7 +910,7 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
                 }}
                 className="text-[11px] text-blue-400 hover:text-blue-300 hover:underline"
               >
-                Course Lecturer / Admin Login (Click to fill)
+                {t.login.adminQuickFill}
               </button>
             </div>
           </div>
@@ -818,18 +919,18 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
         {/* REGISTRATION FORM */}
         {activeTab === 'register' && (
           <form onSubmit={handleRegisterSubmit} className="space-y-3.5 text-xs">
-            {regError && (
+            {displayRegError && (
               <div className="p-3 bg-rose-950/70 border border-rose-500/40 rounded-xl text-xs text-rose-300">
-                {regError}
+                {displayRegError}
               </div>
             )}
 
             <div>
-              <label className="block text-slate-300 font-medium mb-1.5">Student Full Name (සම්පූර්ණ නම) *</label>
+              <label className="block text-slate-300 font-medium mb-1.5">{t.login.fullNameLabel}</label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Kasun Chamara Bandara"
+                placeholder={t.login.fullNamePlaceholder}
                 value={regName}
                 onChange={(e) => setRegName(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
@@ -838,22 +939,22 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
 
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">Index Number / ID *</label>
+                <label className="block text-slate-300 font-medium mb-1.5">{t.login.indexNoLabel}</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. CM-26-105"
+                  placeholder={t.login.indexNoPlaceholder}
                   value={regIndexNo}
                   onChange={(e) => setRegIndexNo(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs font-mono text-slate-100 placeholder-slate-500 transition"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">WhatsApp / Phone *</label>
+                <label className="block text-slate-300 font-medium mb-1.5">{t.login.phoneLabel}</label>
                 <input
                   type="tel"
                   required
-                  placeholder="07x xxx xxxx"
+                  placeholder={t.login.phonePlaceholder}
                   value={regPhone}
                   onChange={(e) => setRegPhone(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
@@ -862,11 +963,11 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-medium mb-1.5">Email Address *</label>
+              <label className="block text-slate-300 font-medium mb-1.5">{t.login.emailLabel}</label>
               <input
                 type="email"
                 required
-                placeholder="student@gmail.com"
+                placeholder={t.login.emailPlaceholder}
                 value={regEmail}
                 onChange={(e) => setRegEmail(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
@@ -875,22 +976,22 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
 
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">Password *</label>
+                <label className="block text-slate-300 font-medium mb-1.5">{t.login.regPasswordLabel}</label>
                 <input
                   type="password"
                   required
-                  placeholder="Create password"
+                  placeholder={t.login.regPasswordPlaceholder}
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">Confirm Password *</label>
+                <label className="block text-slate-300 font-medium mb-1.5">{t.login.confirmPasswordLabel}</label>
                 <input
                   type="password"
                   required
-                  placeholder="Confirm password"
+                  placeholder={t.login.confirmPasswordPlaceholder}
                   value={regConfirmPassword}
                   onChange={(e) => setRegConfirmPassword(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
@@ -906,10 +1007,10 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
               {isRegistering ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Registering...</span>
+                  <span>{t.login.registering}</span>
                 </>
               ) : (
-                <span>Register as Student (ලියාපදිංචි වන්න)</span>
+                <span>{t.login.registerButton}</span>
               )}
             </button>
           </form>
@@ -922,20 +1023,20 @@ function MoodleLoginPage({ onLogin, presetUsers }) {
 // ---------------------------------------------------------------------------------
 // 2. COURSES / PAPERS LIST VIEW
 // ---------------------------------------------------------------------------------
-function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, onDeletePaper, onOpenGrading, onOpenAddPaperModal }) {
+function MoodleCoursesView({ papers, currentUser, submissions, t, onSelectPaper, onDeletePaper, onOpenGrading, onOpenAddPaperModal }) {
   return (
     <div className="space-y-6">
       {/* Course Banner */}
       <div className="bg-[#111827] rounded-2xl border border-slate-800 p-6 md:p-7 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div>
           <span className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">
-            Combined Mathematics 2026 (A/L)
+            {t.common.courseFullTitle}
           </span>
           <h2 className="text-xl md:text-2xl font-bold text-slate-100 tracking-tight mt-1">
-            Examination Papers & Real-Time Test Portal
+            {t.courses.bannerHeading}
           </h2>
           <p className="text-xs text-slate-400 mt-1.5 max-w-2xl leading-relaxed">
-            ප්‍රශ්න පත්‍රය ආරම්භ කළ විගස නියමිත කාලය ගණනය වන අතර, නියමිත වේලාව තුළ පමණක් පිළිතුරු upload කළ යුතුය.
+            {t.courses.bannerDesc}
           </p>
         </div>
 
@@ -945,7 +1046,7 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
             className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shrink-0 shadow-md shadow-blue-600/25"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Add an exam paper (නව පත්‍රයක් එක් කරන්න)</span>
+            <span>{t.courses.addExamPaperBtn}</span>
           </button>
         )}
       </div>
@@ -955,10 +1056,10 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
         <div className="p-4 md:px-6 border-b border-slate-800 bg-[#0c1222] flex items-center justify-between">
           <h3 className="font-bold text-sm text-slate-200 flex items-center space-x-2.5">
             <BookOpen className="w-4 h-4 text-blue-400" />
-            <span>Assigned Examination Papers</span>
+            <span>{t.courses.sectionTitle}</span>
           </h3>
           <span className="text-xs text-slate-400 font-mono px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/60">
-            {papers.length} Papers Active
+            {t.courses.papersActive(papers.length)}
           </span>
         </div>
 
@@ -968,11 +1069,11 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
               <BookOpen className="w-7 h-7 text-blue-400" />
             </div>
             <div>
-              <h4 className="font-bold text-base text-slate-200">දැනට සක්‍රීය ප්‍රශ්න පත්‍ර නොමැත (No Active Exam Papers)</h4>
+              <h4 className="font-bold text-base text-slate-200">{t.courses.emptyTitle}</h4>
               <p className="text-xs text-slate-400 mt-1.5 max-w-md mx-auto leading-relaxed">
                 {currentUser.role === 'teacher' 
-                  ? 'පන්තියේ සිසුන් සඳහා නව ප්‍රශ්න පත්‍රයක් (PDF) එක් කිරීමට පහත බොත්තම ඔබන්න.' 
-                  : 'ගුරුවරයා විසින් නව ප්‍රශ්න පත්‍රයක් ප්‍රකාශයට පත් කළ පසු එය මෙහි දිස්වනු ඇත.'}
+                  ? t.courses.emptyTeacherDesc 
+                  : t.courses.emptyStudentDesc}
               </p>
             </div>
             {currentUser.role === 'teacher' && (
@@ -981,7 +1082,7 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
                 className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-md shadow-blue-600/25 mt-2"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>නව ප්‍රශ්න පත්‍රයක් එක් කරන්න (Add Model Paper)</span>
+                <span>{t.courses.addModelPaperBtn}</span>
               </button>
             )}
           </div>
@@ -1013,11 +1114,11 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
                       </h4>
                       <p className="text-xs text-slate-400 mt-1 line-clamp-1">{paper.instructions}</p>
                       <div className="flex items-center space-x-3 text-[11px] text-slate-400 mt-2 flex-wrap gap-y-1">
-                        <span>Duration: <b className="text-slate-200 font-mono">{paper.durationMinutes} mins</b></span>
+                        <span>{t.courses.durationLabel} <b className="text-slate-200 font-mono">{t.common.minsUnit(paper.durationMinutes)}</b></span>
                         <span>&bull;</span>
-                        <span>Grace: <b className="text-slate-200 font-mono">+{paper.gracePeriodMinutes} mins</b></span>
+                        <span>{t.courses.graceLabel} <b className="text-slate-200 font-mono">+{t.common.minsUnit(paper.gracePeriodMinutes)}</b></span>
                         <span>&bull;</span>
-                        <span>Due: <b className="text-slate-300">{paper.dueDate}</b></span>
+                        <span>{t.courses.dueLabel} <b className="text-slate-300">{paper.dueDate}</b></span>
                       </div>
                     </div>
                   </div>
@@ -1029,14 +1130,14 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
                           onClick={() => onSelectPaper(paper.id)}
                           className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition font-mono"
                         >
-                          {studentSub.marks !== null ? `Graded: ${studentSub.marks}/${paper.totalMarks}` : 'Submitted for Grading'}
+                          {studentSub.marks !== null ? t.courses.gradedBadge(studentSub.marks, paper.totalMarks) : t.courses.submittedBadge}
                         </button>
                       ) : (
                         <button
                           onClick={() => onSelectPaper(paper.id)}
                           className="text-xs font-semibold px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition shadow-md shadow-blue-600/20 flex items-center space-x-1.5"
                         >
-                          <span>Start Exam</span>
+                          <span>{t.courses.startExamBtn}</span>
                           <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       )
@@ -1046,14 +1147,14 @@ function MoodleCoursesView({ papers, currentUser, submissions, onSelectPaper, on
                           onClick={() => onOpenGrading(paper.id)}
                           className="text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg border border-blue-500/20 transition"
                         >
-                          Submissions & Grade
+                          {t.courses.submissionsAndGradeBtn}
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onDeletePaper(paper.id);
                           }}
-                          title="Delete Paper"
+                          title={t.courses.deletePaperTitle}
                           className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition border border-transparent hover:border-rose-500/20"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1079,6 +1180,7 @@ function MoodleExamAssignmentView({
   currentUser, 
   submission, 
   activeSession, 
+  t,
   onRequestStartExam, 
   onSubmitAnswer, 
   onCancelExam,
@@ -1198,7 +1300,7 @@ function MoodleExamAssignmentView({
       {/* Breadcrumbs */}
       <div className="flex items-center justify-between text-xs text-blue-400">
         <div className="flex items-center space-x-2 flex-wrap">
-          <button onClick={onBack} className="hover:text-blue-300 transition">Combined Mathematics 2026 (A/L)</button>
+          <button onClick={onBack} className="hover:text-blue-300 transition">{t.common.courseFullTitle}</button>
           <span className="text-slate-600">&gt;</span>
           <button onClick={onBack} className="hover:text-blue-300 transition font-mono">{paper.code}</button>
           <span className="text-slate-600">&gt;</span>
@@ -1206,7 +1308,7 @@ function MoodleExamAssignmentView({
         </div>
 
         <button onClick={onBack} className="text-blue-400 hover:text-blue-300 hover:underline flex items-center space-x-1">
-          <span>&larr; Back to papers</span>
+          <span>&larr; {t.assignment.backToPapers}</span>
         </button>
       </div>
 
@@ -1243,10 +1345,10 @@ function MoodleExamAssignmentView({
               <div>
                 <span className="text-[11px] font-semibold uppercase tracking-wider block text-slate-400">
                   {isHardExpired 
-                    ? 'Exam Terminated' 
+                    ? t.assignment.statusTerminated
                     : isWritingOver 
-                    ? 'Upload Grace Period Remaining' 
-                    : 'Time Remaining to Write Paper'}
+                    ? t.assignment.statusGrace
+                    : t.assignment.statusWriting}
                 </span>
                 <span className="text-2xl md:text-3xl font-bold font-mono tracking-tight text-white">
                   {isWritingOver ? formatTime(hardSecondsLeft) : formatTime(writingSecondsLeft)}
@@ -1260,14 +1362,14 @@ function MoodleExamAssignmentView({
                   ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' 
                   : 'bg-slate-800 border border-slate-700 text-slate-400'
               }`}>
-                Tab switches: {activeSession.tabSwitches || 0}
+                {t.assignment.tabSwitches(activeSession.tabSwitches || 0)}
               </span>
 
               <button
                 onClick={onCancelExam}
                 className="text-rose-400 hover:text-rose-300 hover:underline text-xs"
               >
-                Abandon Exam
+                {t.assignment.abandonExam}
               </button>
             </div>
           </div>
@@ -1279,10 +1381,10 @@ function MoodleExamAssignmentView({
         
         {/* Meta Info */}
         <div className="text-xs text-slate-400 space-y-1.5 pb-5 border-b border-slate-800">
-          <div><b>Opened:</b> <span className="text-slate-300">{paper.openedDate}</span></div>
-          <div><b>Due:</b> <span className="text-slate-300">{paper.dueDate}</span></div>
+          <div><b>{t.assignment.openedLabel}</b> <span className="text-slate-300">{paper.openedDate}</span></div>
+          <div><b>{t.assignment.dueLabel}</b> <span className="text-slate-300">{paper.dueDate}</span></div>
           <div className="text-blue-400">
-            <b>Strict Examination Time:</b> <span className="font-mono text-blue-300">{paper.durationMinutes} minutes</span> (+{paper.gracePeriodMinutes} mins scan/upload grace buffer)
+            <b>{t.assignment.strictTimeLabel}</b> <span className="font-mono text-blue-300">{t.assignment.strictTimeValue(paper.durationMinutes, paper.gracePeriodMinutes)}</span>
           </div>
         </div>
 
@@ -1296,19 +1398,19 @@ function MoodleExamAssignmentView({
         {/* ------------------------------------------------------------- */}
         {currentUser.role === 'teacher' ? (
           <div className="pt-4 border-t border-slate-800 space-y-4">
-            <h3 className="font-bold text-base text-slate-100">Grading summary</h3>
+            <h3 className="font-bold text-base text-slate-100">{t.assignment.gradingSummaryTitle}</h3>
             
             <div className="border border-slate-800 rounded-xl overflow-hidden text-xs">
               <div className="grid grid-cols-2 p-3 bg-[#0c1222] border-b border-slate-800">
-                <span className="font-semibold text-slate-400">Participants</span>
-                <span className="font-medium text-slate-200">Class Students</span>
+                <span className="font-semibold text-slate-400">{t.assignment.participantsLabel}</span>
+                <span className="font-medium text-slate-200">{t.assignment.participantsValue}</span>
               </div>
               <div className="grid grid-cols-2 p-3 bg-[#111827] border-b border-slate-800">
-                <span className="font-semibold text-slate-400">Submitted</span>
-                <span className="font-medium text-slate-200 font-mono">Active</span>
+                <span className="font-semibold text-slate-400">{t.assignment.submittedLabel}</span>
+                <span className="font-medium text-slate-200 font-mono">{t.assignment.submittedValue}</span>
               </div>
               <div className="grid grid-cols-2 p-3 bg-[#0c1222] border-b border-slate-800">
-                <span className="font-semibold text-slate-400">Question Paper PDF</span>
+                <span className="font-semibold text-slate-400">{t.assignment.questionPaperPdfLabel}</span>
                 <span className="font-medium text-blue-400 font-mono">{paper.pdfFileName}</span>
               </div>
             </div>
@@ -1318,7 +1420,7 @@ function MoodleExamAssignmentView({
                 onClick={onViewAllSubmissions}
                 className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-md shadow-blue-600/20"
               >
-                View all submissions & Grade
+                {t.assignment.viewAllSubmissionsBtn}
               </button>
             </div>
           </div>
@@ -1337,18 +1439,21 @@ function MoodleExamAssignmentView({
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-bold text-base text-amber-300">
-                      ප්‍රශ්න පත්‍රය ආරක්ෂිතව අගුළුලා ඇත (Paper Locked)
+                      {t.assignment.lockedTitle}
                     </h3>
                     <p className="text-xs text-slate-300 leading-relaxed">
-                      විභාගය ආරම්භ කිරීමට පෙර ප්‍රශ්න පත්‍රය බැලීමට හෝ download කිරීමට නොහැක. 
-                      ඔබ පහත <b>"Start Exam & View Paper"</b> බොත්තම එබූ විගස පමණක් ප්‍රශ්න පත්‍රය විවෘත වන අතර ඔබගේ නියමිත කාලය <b className="font-mono text-amber-200">({paper.durationMinutes} minutes)</b> ගණනය වීම ආරම්භ වේ.
+                      {t.assignment.lockedDescBefore}
+                      <b>{t.assignment.lockedDescBtnName}</b>
+                      {t.assignment.lockedDescMiddle}
+                      <b className="font-mono text-amber-200">{t.assignment.lockedDescDuration(paper.durationMinutes)}</b>
+                      {t.assignment.lockedDescAfter}
                     </p>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-amber-500/20 flex items-center justify-between flex-wrap gap-3">
                   <span className="text-xs font-semibold text-amber-300/90 font-mono">
-                    කාලය: පැය {Math.floor(paper.durationMinutes / 60)} යි &bull; Grace buffer: විනාඩි {paper.gracePeriodMinutes} යි
+                    {t.assignment.lockedDurationSummary(paper.durationMinutes, paper.gracePeriodMinutes)}
                   </span>
 
                   <button
@@ -1356,7 +1461,7 @@ function MoodleExamAssignmentView({
                     className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/25 flex items-center space-x-2 transition"
                   >
                     <Unlock className="w-4 h-4" />
-                    <span>Start Exam & View Paper (විභාගය ආරම්භ කරන්න)</span>
+                    <span>{t.assignment.startExamViewPaperBtn}</span>
                   </button>
                 </div>
               </div>
@@ -1366,11 +1471,11 @@ function MoodleExamAssignmentView({
             {activeSession && (
               <div className="space-y-6 border-t border-slate-800 pt-5">
                 {/* Unlocked Paper Viewer Header */}
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0c1222] border border-slate-800 text-xs">
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0c1222] border border-slate-800 text-xs flex-wrap gap-2">
                   <div className="flex items-center space-x-2">
                     <FileText className="w-4 h-4 text-blue-400" />
                     <span className="font-semibold text-blue-400">
-                      මුල් ප්‍රශ්න පත්‍රය (Unlocked Question Paper PDF)
+                      {t.assignment.unlockedPdfTitle}
                     </span>
                   </div>
 
@@ -1381,7 +1486,7 @@ function MoodleExamAssignmentView({
                       className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition shadow-xs"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Open in New Tab</span>
+                      <span>{t.assignment.openInNewTab}</span>
                     </button>
                     <a
                       href={`${paper.pdfUrl}${paper.pdfUrl?.includes('/api/files/') ? '?download=true' : ''}`}
@@ -1391,7 +1496,7 @@ function MoodleExamAssignmentView({
                       className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Download</span>
+                      <span>{t.common.download}</span>
                     </a>
                   </div>
                 </div>
@@ -1410,7 +1515,7 @@ function MoodleExamAssignmentView({
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-sm text-slate-100 flex items-center space-x-2">
                       <UploadCloud className="w-4 h-4 text-blue-400" />
-                      <span>පිළිතුරු පත්‍රය Upload කිරීම (Answer Submission)</span>
+                      <span>{t.assignment.answerSubmissionTitle}</span>
                     </h3>
                   </div>
 
@@ -1425,7 +1530,7 @@ function MoodleExamAssignmentView({
                           : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-slate-200'
                       }`}
                     >
-                      Single PDF File
+                      {t.assignment.modeSinglePdf}
                     </button>
                     <button
                       type="button"
@@ -1436,7 +1541,7 @@ function MoodleExamAssignmentView({
                           : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-slate-200'
                       }`}
                     >
-                      Multiple Photos (Pages)
+                      {t.assignment.modeMultiplePhotos}
                     </button>
                   </div>
 
@@ -1457,12 +1562,12 @@ function MoodleExamAssignmentView({
                         {selectedFile ? (
                           <div className="text-xs">
                             <span className="font-semibold text-emerald-400 block font-mono">{selectedFile.name}</span>
-                            <span className="text-slate-400">{selectedFile.size} &bull; Ready to submit</span>
+                            <span className="text-slate-400">{selectedFile.size} &bull; {t.assignment.readyToSubmit}</span>
                           </div>
                         ) : (
                           <div className="text-xs text-slate-300">
-                            <span className="font-medium block text-slate-200">Click to select Single Answer PDF</span>
-                            <span className="text-[11px] text-slate-500">CamScanner / Adobe Scan PDF (Max 50 MB)</span>
+                            <span className="font-medium block text-slate-200">{t.assignment.selectSinglePdfTitle}</span>
+                            <span className="text-[11px] text-slate-500">{t.assignment.selectSinglePdfHint}</span>
                           </div>
                         )}
                       </label>
@@ -1483,8 +1588,8 @@ function MoodleExamAssignmentView({
                           <div className="w-11 h-11 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center">
                             <ArrowDown className="w-5 h-5" />
                           </div>
-                          <span className="font-medium text-slate-200">Click to select Multiple Page Photos</span>
-                          <span className="text-[11px] text-slate-500">Select all written pages at once (JPG / PNG)</span>
+                          <span className="font-medium text-slate-200">{t.assignment.selectMultiPhotosTitle}</span>
+                          <span className="text-[11px] text-slate-500">{t.assignment.selectMultiPhotosHint}</span>
                         </label>
                       </div>
 
@@ -1492,7 +1597,7 @@ function MoodleExamAssignmentView({
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                           {selectedImages.map((img, idx) => (
                             <div key={img.id} className="p-2.5 rounded-lg bg-[#090d16] border border-slate-800 flex items-center justify-between">
-                              <span className="truncate max-w-[100px] text-slate-300 font-mono">P.{idx + 1}: {img.name}</span>
+                              <span className="truncate max-w-[100px] text-slate-300 font-mono">{t.assignment.pagePrefix(idx + 1)} {img.name}</span>
                               <button onClick={() => removeImage(img.id)} className="text-rose-400 p-1 hover:text-rose-300"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           ))}
@@ -1517,12 +1622,12 @@ function MoodleExamAssignmentView({
                       {isSubmitting ? (
                         <>
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Uploading Answer Script...</span>
+                          <span>{t.assignment.uploadingAnswer}</span>
                         </>
                       ) : (
                         <>
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Submit Answer Script (පිළිතුරු භාරදෙන්න)</span>
+                          <span>{t.assignment.submitAnswerBtn}</span>
                         </>
                       )}
                     </button>
@@ -1534,7 +1639,7 @@ function MoodleExamAssignmentView({
             {/* 2C: SUBMISSION STATUS TABLE */}
             <div className="space-y-3.5 pt-3">
               <h3 className="font-bold text-lg text-slate-100 tracking-tight">
-                Submission status
+                {t.assignment.submissionStatusTitle}
               </h3>
 
               <div className="border border-slate-800 rounded-xl overflow-hidden text-xs">
@@ -1542,46 +1647,46 @@ function MoodleExamAssignmentView({
                   <tbody>
                     <tr className="border-b border-slate-800">
                       <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
-                        Submission status
+                        {t.assignment.rowSubmissionStatus}
                       </td>
                       <td className={`p-3.5 ${submission ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300'}`}>
-                        {submission ? 'Submitted for grading' : 'No submissions have been made yet'}
+                        {submission ? t.assignment.submittedForGrading : t.assignment.noSubmissionsYet}
                       </td>
                     </tr>
 
                     <tr className="border-b border-slate-800">
                       <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
-                        Grading status
+                        {t.assignment.rowGradingStatus}
                       </td>
                       <td className="p-3.5 text-slate-300">
                         {submission && submission.marks !== null ? (
                           <span className="font-bold text-emerald-400 font-mono">
-                            Graded ({submission.marks} / {paper.totalMarks})
+                            {t.assignment.gradedValue(submission.marks, paper.totalMarks)}
                           </span>
                         ) : (
-                          <span className="text-slate-500">Not graded</span>
+                          <span className="text-slate-500">{t.assignment.notGraded}</span>
                         )}
                       </td>
                     </tr>
 
                     <tr className="border-b border-slate-800">
                       <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
-                        Time remaining
+                        {t.assignment.rowTimeRemaining}
                       </td>
                       <td className="p-3.5 text-slate-300 font-mono">
                         {submission ? (
-                          <span className="text-emerald-400 font-medium">Assignment was submitted</span>
+                          <span className="text-emerald-400 font-medium">{t.assignment.assignmentSubmitted}</span>
                         ) : activeSession ? (
-                          <span className="text-blue-400 font-semibold">{formatTime(hardSecondsLeft)} remaining</span>
+                          <span className="text-blue-400 font-semibold">{t.assignment.timeLeftSuffix(formatTime(hardSecondsLeft))}</span>
                         ) : (
-                          <span className="text-slate-400">Available according to due date</span>
+                          <span className="text-slate-400">{t.assignment.availableByDueDate}</span>
                         )}
                       </td>
                     </tr>
 
                     <tr className="border-b border-slate-800">
                       <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
-                        Last modified
+                        {t.assignment.rowLastModified}
                       </td>
                       <td className="p-3.5 text-slate-300 font-mono">
                         {submission ? submission.submittedAt : '-'}
@@ -1591,7 +1696,7 @@ function MoodleExamAssignmentView({
                     {submission && (
                       <tr className="border-b border-slate-800">
                         <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
-                          File submissions
+                          {t.assignment.rowFileSubmissions}
                         </td>
                         <td className="p-3.5 text-slate-300">
                           <div className="flex items-center space-x-2 text-blue-400 font-mono">
@@ -1607,16 +1712,16 @@ function MoodleExamAssignmentView({
 
                     <tr>
                       <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
-                        Submission comments
+                        {t.assignment.rowSubmissionComments}
                       </td>
                       <td className="p-3.5 text-slate-300">
                         <details className="cursor-pointer">
                           <summary className="text-blue-400 hover:underline font-medium">
-                            Comments ({submission && submission.feedback ? '1' : '0'})
+                            {t.assignment.commentsCount(submission && submission.feedback ? '1' : '0')}
                           </summary>
                           {submission && submission.feedback && (
                             <div className="p-3 mt-2 rounded-lg bg-[#0c1222] border border-slate-800 text-slate-300">
-                              <b className="text-blue-400">Teacher Feedback:</b> {submission.feedback}
+                              <b className="text-blue-400">{t.assignment.teacherFeedbackPrefix}</b> {submission.feedback}
                             </div>
                           )}
                         </details>
@@ -1638,7 +1743,7 @@ function MoodleExamAssignmentView({
 // ---------------------------------------------------------------------------------
 // 4. TEACHER SUBMISSIONS WORKSHEET (Grading Table & CSV Export)
 // ---------------------------------------------------------------------------------
-function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, onGradeSubmission, onBack }) {
+function MoodleTeacherGradingView({ paper, papers, submissions, t, onSelectPaper, onGradeSubmission, onBack }) {
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -1676,15 +1781,15 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
     <div className="space-y-5">
       <div className="flex items-center justify-between text-xs text-blue-400">
         <div className="flex items-center space-x-2 flex-wrap">
-          <button onClick={onBack} className="hover:text-blue-300 transition">Combined Mathematics 2026 (A/L)</button>
+          <button onClick={onBack} className="hover:text-blue-300 transition">{t.common.courseFullTitle}</button>
           <span className="text-slate-600">&gt;</span>
           <button onClick={onBack} className="hover:text-blue-300 transition font-mono">{paper.code}</button>
           <span className="text-slate-600">&gt;</span>
-          <span className="text-slate-300 font-medium">Submissions grading worksheet</span>
+          <span className="text-slate-300 font-medium">{t.grading.breadcrumbTitle}</span>
         </div>
 
         <button onClick={onBack} className="text-blue-400 hover:text-blue-300 hover:underline flex items-center space-x-1">
-          <span>&larr; Back to assignment</span>
+          <span>&larr; {t.grading.backToAssignment}</span>
         </button>
       </div>
 
@@ -1692,10 +1797,10 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
         <div>
           <h2 className="text-lg md:text-xl font-bold text-slate-100 flex items-center space-x-2.5">
             <Layers className="w-5 h-5 text-blue-400" />
-            <span>Grading Worksheet: {paper.title}</span>
+            <span>{t.grading.headingPrefix} {paper.title}</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Evaluate student answer scripts, record marks /100 and export results.
+            {t.grading.subtitle}
           </p>
         </div>
 
@@ -1704,7 +1809,7 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
           className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition shadow-md shadow-emerald-600/25"
         >
           <FileSpreadsheet className="w-4 h-4" />
-          <span>Export Excel / CSV</span>
+          <span>{t.grading.exportCsv}</span>
         </button>
       </div>
 
@@ -1714,7 +1819,7 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
             <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
             <input
               type="text"
-              placeholder="Search student or index..."
+              placeholder={t.grading.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3.5 py-2 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs bg-[#090d16] text-slate-100 placeholder-slate-500 transition"
@@ -1726,14 +1831,14 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-3 py-2 border border-slate-700/80 rounded-xl text-xs text-slate-300 bg-[#090d16] focus:outline-none focus:border-blue-500"
           >
-            <option value="ALL">All submission status</option>
-            <option value="ON_TIME">On Time</option>
-            <option value="LATE">Late</option>
+            <option value="ALL">{t.grading.filterAll}</option>
+            <option value="ON_TIME">{t.grading.filterOnTime}</option>
+            <option value="LATE">{t.grading.filterLate}</option>
           </select>
         </div>
 
         <span className="text-xs text-slate-400 font-mono">
-          Showing {filtered.length} submissions
+          {t.grading.showingCount(filtered.length)}
         </span>
       </div>
 
@@ -1743,13 +1848,13 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
           <table className="w-full text-left text-xs border-collapse">
             <thead className="bg-[#0c1222] border-b border-slate-800 text-slate-400 font-semibold tracking-wider text-[11px]">
               <tr>
-                <th className="p-3.5">Student details</th>
-                <th className="p-3.5">Status</th>
-                <th className="p-3.5">Duration</th>
-                <th className="p-3.5">Grade</th>
-                <th className="p-3.5">Submitted At</th>
-                <th className="p-3.5">Answer Script</th>
-                <th className="p-3.5 text-right">Action</th>
+                <th className="p-3.5">{t.grading.colStudentDetails}</th>
+                <th className="p-3.5">{t.grading.colStatus}</th>
+                <th className="p-3.5">{t.grading.colDuration}</th>
+                <th className="p-3.5">{t.grading.colGrade}</th>
+                <th className="p-3.5">{t.grading.colSubmittedAt}</th>
+                <th className="p-3.5">{t.grading.colAnswerScript}</th>
+                <th className="p-3.5 text-right">{t.grading.colAction}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80 text-slate-200">
@@ -1763,19 +1868,25 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
                     <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-semibold ${
                       sub.status === 'ON_TIME'
                         ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        : sub.status === 'DISQUALIFIED'
+                        ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                         : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                     }`}>
-                      {sub.status === 'ON_TIME' ? 'Submitted On Time' : 'Submitted Late'}
+                      {sub.status === 'ON_TIME'
+                        ? t.grading.statusOnTime
+                        : sub.status === 'DISQUALIFIED'
+                        ? t.grading.statusDisqualified
+                        : t.grading.statusLate}
                     </span>
                   </td>
                   <td className="p-3.5 font-mono text-slate-300">
-                    {sub.durationTakenMins} mins
+                    {t.common.minsUnit(sub.durationTakenMins)}
                   </td>
                   <td className="p-3.5 font-semibold font-mono">
                     {sub.marks !== null ? (
                       <span className="text-emerald-400">{sub.marks} / {paper.totalMarks}</span>
                     ) : (
-                      <span className="text-slate-500 italic font-normal">Not graded</span>
+                      <span className="text-slate-500 italic font-normal">{t.grading.notGraded}</span>
                     )}
                   </td>
                   <td className="p-3.5 text-slate-400 font-mono text-[11px]">
@@ -1805,7 +1916,7 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
                       onClick={() => onGradeSubmission(sub)}
                       className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-xs"
                     >
-                      Grade
+                      {t.grading.gradeBtn}
                     </button>
                   </td>
                 </tr>
@@ -1821,13 +1932,13 @@ function MoodleTeacherGradingView({ paper, papers, submissions, onSelectPaper, o
 // ---------------------------------------------------------------------------------
 // 5. CREATE PAPER MODAL (Teacher Uploads Question Paper PDF)
 // ---------------------------------------------------------------------------------
-function MoodleCreatePaperModal({ onSave, onClose }) {
+function MoodleCreatePaperModal({ t, onSave, onClose }) {
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('Pure Mathematics');
   const [durationMinutes, setDurationMinutes] = useState('180');
   const [gracePeriodMinutes, setGracePeriodMinutes] = useState('15');
   const [dueDate, setDueDate] = useState('Wednesday, 11 November 2026, 11:59 PM');
-  const [instructions, setInstructions] = useState('සියලුම ප්‍රශ්න වලට පිළිතුරු සපයන්න. පැහැදිලි පියවර සටහන් කරන්න.');
+  const [instructions, setInstructions] = useState(t.createPaperModal.defaultInstructions);
   const [pdfFile, setPdfFile] = useState(null);
 
   const handlePdfUpload = (e) => {
@@ -1875,18 +1986,18 @@ function MoodleCreatePaperModal({ onSave, onClose }) {
       <div className="bg-[#111827] rounded-2xl border border-slate-800 max-w-lg w-full p-6 md:p-7 space-y-5 shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
           <h3 className="text-base font-bold text-slate-100 tracking-tight">
-            Add a new Exam Paper / Test
+            {t.createPaperModal.heading}
           </h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200 transition">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">Paper Title</label>
+            <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.paperTitleLabel}</label>
             <input
               type="text"
               required
-              placeholder="e.g. Model Paper 03 - Pure Mathematics"
+              placeholder={t.createPaperModal.paperTitlePlaceholder}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs bg-[#090d16] text-slate-100 placeholder-slate-500 transition"
@@ -1895,19 +2006,19 @@ function MoodleCreatePaperModal({ onSave, onClose }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-300 font-medium mb-1.5">Subject Stream</label>
+              <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.subjectStreamLabel}</label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs bg-[#090d16] text-slate-200 transition"
               >
-                <option value="Pure Mathematics">Pure Mathematics</option>
-                <option value="Applied Mathematics">Applied Mathematics</option>
-                <option value="Combined Mathematics (Full)">Combined Mathematics (Full)</option>
+                <option value="Pure Mathematics">{t.createPaperModal.streamPure}</option>
+                <option value="Applied Mathematics">{t.createPaperModal.streamApplied}</option>
+                <option value="Combined Mathematics (Full)">{t.createPaperModal.streamCombined}</option>
               </select>
             </div>
             <div>
-              <label className="block text-slate-300 font-medium mb-1.5">Exam Duration (Mins)</label>
+              <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.durationLabel}</label>
               <input
                 type="number"
                 required
@@ -1921,7 +2032,7 @@ function MoodleCreatePaperModal({ onSave, onClose }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">Upload Grace Buffer (Mins)</label>
+            <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.graceBufferLabel}</label>
             <input
               type="number"
               required
@@ -1934,7 +2045,7 @@ function MoodleCreatePaperModal({ onSave, onClose }) {
           </div>
 
           <div className="p-3.5 bg-[#0c1222] border border-slate-800 rounded-xl space-y-2">
-            <label className="block text-slate-300 font-semibold">Upload Question Paper PDF</label>
+            <label className="block text-slate-300 font-semibold">{t.createPaperModal.uploadPdfLabel}</label>
             <input
               type="file"
               accept=".pdf"
@@ -1947,14 +2058,14 @@ function MoodleCreatePaperModal({ onSave, onClose }) {
               className="border border-dashed border-slate-700 rounded-lg p-3 flex items-center justify-between cursor-pointer hover:border-blue-500/60 bg-[#090d16] transition"
             >
               <span className="text-xs text-slate-300 truncate">
-                {pdfFile ? `${pdfFile.name} (${pdfFile.size})` : 'Select Question Paper PDF from computer'}
+                {pdfFile ? `${pdfFile.name} (${pdfFile.size})` : t.createPaperModal.selectPdfPrompt}
               </span>
               <UploadCloud className="w-4 h-4 text-blue-400 shrink-0" />
             </label>
           </div>
 
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">Instructions</label>
+            <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.instructionsLabel}</label>
             <textarea
               rows={2}
               value={instructions}
@@ -1969,13 +2080,13 @@ function MoodleCreatePaperModal({ onSave, onClose }) {
               onClick={onClose}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"
             >
-              Cancel
+              {t.common.cancel}
             </button>
             <button
               type="submit"
               className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs shadow-md shadow-blue-600/25 transition"
             >
-              Save and Publish
+              {t.createPaperModal.saveAndPublish}
             </button>
           </div>
         </form>
@@ -1987,7 +2098,7 @@ function MoodleCreatePaperModal({ onSave, onClose }) {
 // ---------------------------------------------------------------------------------
 // 6. GRADE MODAL
 // ---------------------------------------------------------------------------------
-function MoodleGradeModal({ submission, paper, onSave, onClose }) {
+function MoodleGradeModal({ submission, paper, t, onSave, onClose }) {
   const [marks, setMarks] = useState(submission.marks !== null ? submission.marks : '');
   const [feedback, setFeedback] = useState(submission.feedback || '');
 
@@ -2005,26 +2116,26 @@ function MoodleGradeModal({ submission, paper, onSave, onClose }) {
       <div className="bg-[#111827] rounded-2xl border border-slate-800 max-w-lg w-full p-6 md:p-7 space-y-5 shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
           <div>
-            <h3 className="text-base font-bold text-slate-100 tracking-tight">Grade Submission</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Student: <b className="text-blue-400">{submission.studentName}</b> (<span className="font-mono text-slate-300">{submission.studentIndex}</span>)</p>
+            <h3 className="text-base font-bold text-slate-100 tracking-tight">{t.gradeModal.heading}</h3>
+            <p className="text-xs text-slate-400 mt-0.5">{t.gradeModal.studentLabel} <b className="text-blue-400">{submission.studentName}</b> (<span className="font-mono text-slate-300">{submission.studentIndex}</span>)</p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200 transition">✕</button>
         </div>
 
         <div className="p-3.5 bg-[#0c1222] rounded-xl border border-slate-800 text-xs space-y-1.5">
           <div className="flex justify-between">
-            <span className="text-slate-400">File script:</span>
+            <span className="text-slate-400">{t.gradeModal.fileScriptLabel}</span>
             <span className="font-semibold text-blue-400 font-mono">{submission.fileName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-400">Duration taken:</span>
-            <span className="font-mono text-slate-200">{submission.durationTakenMins} mins</span>
+            <span className="text-slate-400">{t.gradeModal.durationTakenLabel}</span>
+            <span className="font-mono text-slate-200">{t.common.minsUnit(submission.durationTakenMins)}</span>
           </div>
         </div>
 
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">Grade out of {paper.totalMarks}</label>
+            <label className="block text-slate-300 font-medium mb-1.5">{t.gradeModal.gradeOutOfLabel(paper.totalMarks)}</label>
             <input
               type="number"
               min="0"
@@ -2037,12 +2148,12 @@ function MoodleGradeModal({ submission, paper, onSave, onClose }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">Feedback comments</label>
+            <label className="block text-slate-300 font-medium mb-1.5">{t.gradeModal.feedbackLabel}</label>
             <textarea
               rows={3}
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Enter feedback comments for the student..."
+              placeholder={t.gradeModal.feedbackPlaceholder}
               className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs bg-[#090d16] text-slate-100 placeholder-slate-500 transition"
             />
           </div>
@@ -2053,13 +2164,13 @@ function MoodleGradeModal({ submission, paper, onSave, onClose }) {
               onClick={onClose}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"
             >
-              Cancel
+              {t.common.cancel}
             </button>
             <button
               type="submit"
               className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs shadow-md shadow-blue-600/25 transition"
             >
-              Save changes
+              {t.gradeModal.saveChanges}
             </button>
           </div>
         </form>
