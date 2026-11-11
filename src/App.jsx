@@ -59,48 +59,48 @@ const getPaperSection = (paper) => {
 const SECTION_STYLES = {
   'Home Work Assignment': {
     Icon: ClipboardList,
-    badgeClass: 'bg-sky-500/10 text-sky-300 border-sky-500/25',
+    badgeClass: 'bg-sky-50 text-sky-700 border-sky-200',
   },
   'Challenge Papers': {
     Icon: Flame,
-    badgeClass: 'bg-orange-500/10 text-orange-300 border-orange-500/25',
+    badgeClass: 'bg-orange-50 text-[#ff6600] border-orange-200',
   },
   'Week Test': {
     Icon: Calendar,
-    badgeClass: 'bg-blue-500/10 text-blue-300 border-blue-500/25',
+    badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   },
   'Month Test': {
     Icon: CalendarRange,
-    badgeClass: 'bg-violet-500/10 text-violet-300 border-violet-500/25',
+    badgeClass: 'bg-violet-50 text-violet-700 border-violet-200',
   },
   'Full Papers': {
     Icon: FileText,
-    badgeClass: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25',
+    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
   Tutes: {
     Icon: BookOpen,
-    badgeClass: 'bg-amber-500/10 text-amber-300 border-amber-500/25',
+    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
   },
 };
 
 function LanguageToggle({ lang, setLang, fullLabels = false, title = 'Select Language' }) {
   return (
     <div
-      className="inline-flex items-center p-0.5 rounded-lg bg-[#090d16] border border-slate-800 text-[11px] font-semibold shrink-0"
+      className="inline-flex items-center p-1 rounded-full bg-slate-100 border border-slate-200/80 text-[11px] font-bold shrink-0"
       role="group"
       aria-label={title}
       title={title}
     >
-      <span className="pl-2 pr-1 text-slate-400 flex items-center">
+      <span className="pl-2 pr-1 text-[#ff6600] flex items-center">
         <Globe className="w-3.5 h-3.5" />
       </span>
       <button
         type="button"
         onClick={() => setLang('en')}
-        className={`px-2 py-1 rounded-md transition ${
+        className={`px-2.5 py-1 rounded-full transition cursor-pointer ${
           lang === 'en'
-            ? 'bg-blue-600 text-white shadow-xs'
-            : 'text-slate-400 hover:text-slate-200'
+            ? 'bg-white text-[#ff6600] shadow-xs'
+            : 'text-slate-600 hover:text-slate-900'
         }`}
       >
         {fullLabels ? 'English' : 'EN'}
@@ -108,10 +108,10 @@ function LanguageToggle({ lang, setLang, fullLabels = false, title = 'Select Lan
       <button
         type="button"
         onClick={() => setLang('si')}
-        className={`px-2 py-1 rounded-md transition ${
+        className={`px-2.5 py-1 rounded-full transition cursor-pointer ${
           lang === 'si'
-            ? 'bg-blue-600 text-white shadow-xs'
-            : 'text-slate-400 hover:text-slate-200'
+            ? 'bg-white text-[#ff6600] shadow-xs'
+            : 'text-slate-600 hover:text-slate-900'
         }`}
       >
         {fullLabels ? 'සිංහල' : 'සිං'}
@@ -463,20 +463,23 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-[#ff6600] selection:text-white">
       {/* Toast Alert */}
       {toastMessage && (
         <div className="fixed top-4 right-4 z-50">
-          <div className={`px-4 py-3 rounded-lg shadow-xl flex items-center space-x-2.5 border text-xs font-medium backdrop-blur-md ${
+          <div className={`px-4 py-3 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.08)] flex items-center space-x-2.5 border text-xs font-bold backdrop-blur-md ${
             toastMessage.type === 'error'
-              ? 'bg-rose-950/90 border-rose-500/30 text-rose-300'
+              ? 'bg-red-50/95 border-red-200 text-red-700'
               : toastMessage.type === 'warning'
-              ? 'bg-amber-950/90 border-amber-500/30 text-amber-300'
-              : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-300'
+              ? 'bg-amber-50/95 border-amber-200 text-amber-800'
+              : toastMessage.type === 'success'
+              ? 'bg-emerald-50/95 border-emerald-200 text-emerald-800'
+              : 'bg-white/95 border-orange-200 text-slate-800'
           }`}>
-            {toastMessage.type === 'error' && <XCircle className="w-4 h-4 shrink-0 text-rose-400" />}
-            {toastMessage.type === 'warning' && <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />}
-            {toastMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />}
+            {toastMessage.type === 'error' && <XCircle className="w-4 h-4 shrink-0 text-red-500" />}
+            {toastMessage.type === 'warning' && <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500" />}
+            {toastMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />}
+            {toastMessage.type === 'info' && <CheckCircle2 className="w-4 h-4 shrink-0 text-[#ff6600]" />}
             <span>{toastMessage.message}</span>
           </div>
         </div>
@@ -484,16 +487,16 @@ export default function App() {
 
       {/* Anti-Cheat Tab Switch Alert Modal */}
       {tabSwitchAlert && activeSession && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="bg-[#111827] rounded-xl border border-rose-500/40 max-w-md w-full p-6 text-center space-y-4 shadow-2xl">
-            <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 mx-auto flex items-center justify-center">
-              <ShieldAlert className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl border border-red-200 max-w-md w-full p-7 text-center space-y-4 shadow-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 text-red-600 mx-auto flex items-center justify-center">
+              <ShieldAlert className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-rose-300">{t.tabSwitchModal.title}</h3>
-              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">{t.tabSwitchModal.title}</h3>
+              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
                 {t.tabSwitchModal.beforeCount}
-                <b className="text-rose-400 font-mono">
+                <b className="text-red-600 font-black font-mono">
                   {t.tabSwitchModal.countText(activeSession.tabSwitches || 1)}
                 </b>
                 {t.tabSwitchModal.afterCount}
@@ -501,7 +504,7 @@ export default function App() {
             </div>
             <button
               onClick={() => setTabSwitchAlert(false)}
-              className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition"
+              className="w-full py-3 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs shadow-md shadow-orange-500/25 transition cursor-pointer"
             >
               {t.tabSwitchModal.dismiss}
             </button>
@@ -509,100 +512,102 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Navbar */}
-      <header className="bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40 px-4 md:px-6 py-2.5 flex items-center justify-between gap-2">
-        <div className="flex items-center space-x-3 md:space-x-4 min-w-0">
-          <div 
-            onClick={() => setActiveView('courses')}
-            className="flex items-center space-x-2.5 cursor-pointer group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-500 flex items-center justify-center text-slate-900 border border-amber-400/30 shadow-md shadow-amber-500/10 shrink-0 group-hover:scale-105 transition">
-              <GraduationCap className="w-5 h-5 text-slate-950" />
-            </div>
-            <div className="min-w-0">
-              <span className="font-bold text-sm text-slate-100 block leading-tight tracking-tight truncate">
-                {t.common.courseTitle}
-              </span>
-              <span className="text-[11px] text-slate-400 font-medium block truncate">
-                {t.common.portalSubtitle}
-              </span>
-            </div>
-          </div>
-
-          <div className="hidden sm:flex items-center space-x-1 pl-3 border-l border-slate-800">
-            <button 
+      {/* Floating Pill Navbar (SwiftDrop Style) */}
+      <div className="sticky top-0 z-40 pt-3 sm:pt-4 px-3 sm:px-6 pointer-events-none">
+        <header className="max-w-6xl mx-auto flex items-center justify-between gap-2 bg-white/90 backdrop-blur-xl px-4 sm:px-6 py-2.5 rounded-full shadow-[0_8px_32px_0_rgba(0,0,0,0.06)] border border-slate-200/80 pointer-events-auto transition-all">
+          <div className="flex items-center space-x-3 md:space-x-4 min-w-0">
+            <div
               onClick={() => setActiveView('courses')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                activeView === 'courses' 
-                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
+              className="flex items-center space-x-2.5 cursor-pointer group min-w-0"
             >
-              {t.nav.papers}
-            </button>
-            {currentUser.role === 'teacher' && (
-              <button 
-                onClick={() => setActiveView('teacher_grading')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  activeView === 'teacher_grading' 
-                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#ff6600] to-[#ff9900] flex items-center justify-center text-white shadow-md shadow-orange-500/25 shrink-0 group-hover:scale-105 transition">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-black text-sm sm:text-base text-slate-900 block leading-tight tracking-tight truncate">
+                  {t.common.courseTitle}<span className="text-[#ff6600]">.</span>
+                </span>
+                <span className="text-[10px] sm:text-[11px] text-slate-400 font-semibold block truncate">
+                  {t.common.portalSubtitle}
+                </span>
+              </div>
+            </div>
+
+            <div className="hidden sm:flex items-center space-x-1.5 pl-3 border-l border-slate-200/80 shrink-0">
+              <button
+                onClick={() => setActiveView('courses')}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                  activeView === 'courses'
+                    ? 'bg-[#ff6600] text-white shadow-md shadow-orange-500/20'
+                    : 'text-slate-600 hover:text-[#ff6600] hover:bg-orange-50'
                 }`}
               >
-                {t.nav.grading}
+                {t.nav.papers}
+              </button>
+              {currentUser.role === 'teacher' && (
+                <button
+                  onClick={() => setActiveView('teacher_grading')}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                    activeView === 'teacher_grading'
+                      ? 'bg-[#ff6600] text-white shadow-md shadow-orange-500/20'
+                      : 'text-slate-600 hover:text-[#ff6600] hover:bg-orange-50'
+                  }`}
+                >
+                  {t.nav.grading}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Right Controls */}
+          <div className="flex items-center space-x-2 shrink-0">
+            {currentUser.role === 'teacher' && (
+              <button
+                onClick={() => setShowAddPaperModal(true)}
+                className="hidden lg:inline-flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-[#111827] hover:bg-[#ff6600] text-white font-bold text-xs whitespace-nowrap transition shadow-sm cursor-pointer"
+              >
+                <PlusCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{t.nav.addModelPaper}</span>
               </button>
             )}
-          </div>
-        </div>
 
-        {/* Right Controls */}
-        <div className="flex items-center space-x-2 shrink-0">
-          {currentUser.role === 'teacher' && (
+            {/* Language Switcher */}
+            <LanguageToggle
+              lang={lang}
+              setLang={setLang}
+              title={t.nav.selectLanguage}
+            />
+
+            {/* User Badge */}
+            <div className="flex items-center space-x-2 px-1.5 lg:px-3 py-1 bg-orange-50/80 border border-orange-200/70 rounded-full text-xs">
+              <div className="w-6 h-6 rounded-full bg-[#ff7a00] text-white text-[10px] font-black flex items-center justify-center shrink-0 shadow-xs">
+                {currentUser.initials || 'ST'}
+              </div>
+              <div className="text-left hidden lg:block">
+                <span className="font-bold text-slate-900 block leading-none max-w-[110px] truncate">
+                  {currentUser.name}
+                </span>
+                <span className="text-[10px] text-[#ff6600] font-bold font-mono">
+                  {currentUser.role === 'student' ? (currentUser.indexNo || t.common.studentRole) : t.common.teacherRole}
+                </span>
+              </div>
+            </div>
+
+            {/* Logout Button */}
             <button
-              onClick={() => setShowAddPaperModal(true)}
-              className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-md shadow-blue-600/20"
+              onClick={handleLogout}
+              className="p-2 md:px-3.5 md:py-1.5 rounded-full bg-white hover:bg-[#ff6600] text-slate-600 hover:text-white border border-slate-200 hover:border-[#ff6600] text-xs font-bold whitespace-nowrap transition flex items-center space-x-1 cursor-pointer"
+              title={t.nav.logoutTitle}
             >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span>{t.nav.addModelPaper}</span>
+              <LogOut className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden md:inline">{t.nav.logout}</span>
             </button>
-          )}
-
-          {/* Language Switcher */}
-          <LanguageToggle
-            lang={lang}
-            setLang={setLang}
-            title={t.nav.selectLanguage}
-          />
-
-          {/* User Badge */}
-          <div className="flex items-center space-x-2 px-2.5 sm:px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs">
-            <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-              {currentUser.initials || 'ST'}
-            </div>
-            <div className="text-left hidden xs:block sm:block">
-              <span className="font-semibold text-slate-200 block leading-none max-w-[110px] truncate">
-                {currentUser.name}
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">
-                {currentUser.role === 'student' ? (currentUser.indexNo || t.common.studentRole) : t.common.teacherRole}
-              </span>
-            </div>
           </div>
-
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 text-xs font-medium transition flex items-center space-x-1"
-            title={t.nav.logoutTitle}
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">{t.nav.logout}</span>
-          </button>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {/* Main Body */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-5 md:py-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-5 md:py-7">
         {activeView === 'courses' ? (
           <MoodleCoursesView 
             papers={papers}
@@ -674,28 +679,28 @@ export default function App() {
 
       {/* Start Exam Confirmation Modal (Anti-Leak Protection) */}
       {showConfirmStartModal && currentPaper && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="bg-[#111827] rounded-xl border border-slate-800 max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl border border-slate-100 max-w-md w-full p-7 space-y-5 shadow-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-200/80 text-[#ff6600] flex items-center justify-center">
               <Clock className="w-6 h-6" />
             </div>
 
             <div>
-              <span className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">{currentPaper.subject}</span>
-              <h3 className="text-base font-bold text-slate-100 mt-0.5">{currentPaper.title}</h3>
+              <span className="text-[11px] font-black text-[#ff6600] uppercase tracking-wider">{currentPaper.subject}</span>
+              <h3 className="text-lg font-black text-slate-900 mt-0.5 tracking-tight">{currentPaper.title}</h3>
             </div>
 
             {/* Strict Exam Start Notice */}
-            <div className="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs space-y-2 leading-relaxed">
-              <div className="font-bold flex items-center space-x-1.5 text-amber-200">
+            <div className="p-4 rounded-2xl bg-orange-50/70 border border-orange-200 text-slate-700 text-xs space-y-2 leading-relaxed">
+              <div className="font-black flex items-center space-x-1.5 text-[#ff6600]">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 <span>{t.startExamModal.heading}</span>
               </div>
               <p>
                 {t.startExamModal.para1Before}
-                <b>{t.startExamModal.para1ButtonName}</b>
+                <b className="text-slate-900">{t.startExamModal.para1ButtonName}</b>
                 {t.startExamModal.para1Middle}
-                <b className="font-mono">{t.startExamModal.para1Duration(currentPaper.durationMinutes)}</b>
+                <b className="font-mono text-[#ff6600]">{t.startExamModal.para1Duration(currentPaper.durationMinutes)}</b>
                 {t.startExamModal.para1After}
               </p>
               <p>
@@ -703,16 +708,16 @@ export default function App() {
               </p>
             </div>
 
-            <div className="flex items-center justify-end space-x-2 pt-2">
+            <div className="flex items-center justify-end space-x-2.5 pt-2">
               <button
                 onClick={() => setShowConfirmStartModal(false)}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"
+                className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
               >
                 {t.startExamModal.cancel}
               </button>
               <button
                 onClick={handleStartExam}
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/20 flex items-center space-x-1.5 transition"
+                className="px-5 py-2.5 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs shadow-md shadow-orange-500/25 flex items-center space-x-1.5 transition cursor-pointer"
               >
                 <span>{t.startExamModal.confirm}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -756,10 +761,16 @@ export default function App() {
       )}
 
       {/* Clean Footer */}
-      <footer className="bg-[#0b0f19] border-t border-slate-800/80 py-4 mt-auto text-center text-xs text-slate-400">
+      <footer className="bg-white border-t border-slate-200/70 py-4 mt-auto text-center text-xs text-slate-500">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>{t.footer.portalInfo}</span>
-          <span>{t.footer.loggedInAs} <b className="text-slate-200">{currentUser.name}</b> {currentUser.indexNo ? <span className="font-mono text-slate-400">({currentUser.indexNo})</span> : ''}</span>
+          <div className="inline-flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="font-medium">{t.footer.portalInfo}</span>
+          </div>
+          <span>
+            {t.footer.loggedInAs} <b className="text-slate-900">{currentUser.name}</b>{' '}
+            {currentUser.indexNo ? <span className="font-mono font-bold text-[#ff6600]">({currentUser.indexNo})</span> : ''}
+          </span>
         </div>
       </footer>
     </div>
@@ -853,8 +864,8 @@ function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
   const displayRegError = resolveError(regError, t.login.registerFallbackError);
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] flex flex-col justify-center items-center p-4 selection:bg-blue-600 selection:text-white">
-      <div className="max-w-md w-full bg-[#111827] rounded-2xl border border-slate-800 shadow-2xl p-6 md:p-8 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#fffaf4] to-[#f1f5f9] flex flex-col justify-center items-center p-4 selection:bg-[#ff6600] selection:text-white relative overflow-hidden">
+      <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200/80 shadow-xl p-7 sm:p-9 space-y-6 relative z-10">
         <div className="flex justify-end -mt-1 -mb-2">
           <LanguageToggle
             lang={lang}
@@ -865,26 +876,26 @@ function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
         </div>
 
         <div className="text-center space-y-2.5">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-500 mx-auto flex items-center justify-center text-slate-950 border border-amber-400/40 shadow-lg shadow-amber-500/10">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#ff6600] to-[#ff9900] mx-auto flex items-center justify-center text-white shadow-lg shadow-orange-500/25">
             <GraduationCap className="w-9 h-9" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
-            {t.login.title}
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            {t.login.title}<span className="text-[#ff6600]">.</span>
           </h1>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-slate-500 leading-relaxed">
             {t.login.subtitle}
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex border-b border-slate-800">
+        {/* Segmented Tab Switcher */}
+        <div className="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl">
           <button
             type="button"
             onClick={() => setActiveTab('login')}
-            className={`flex-1 pb-3 text-xs font-semibold text-center border-b-2 transition ${
+            className={`py-2 text-xs font-bold text-center rounded-lg transition cursor-pointer ${
               activeTab === 'login'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-[#ff6600] shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             {t.login.loginTab}
@@ -892,10 +903,10 @@ function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
           <button
             type="button"
             onClick={() => setActiveTab('register')}
-            className={`flex-1 pb-3 text-xs font-semibold text-center border-b-2 transition ${
+            className={`py-2 text-xs font-bold text-center rounded-lg transition cursor-pointer ${
               activeTab === 'register'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-[#ff6600] shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             {t.login.registerTab}
@@ -906,40 +917,40 @@ function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
         {activeTab === 'login' && (
           <div className="space-y-4">
             {displayLoginError && (
-              <div className="p-3 bg-rose-950/70 border border-rose-500/40 rounded-xl text-xs text-rose-300">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium">
                 {displayLoginError}
               </div>
             )}
 
             <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">{t.login.identifierLabel}</label>
+                <label className="block text-slate-700 font-semibold mb-1.5">{t.login.identifierLabel}</label>
                 <input
                   type="text"
                   required
                   placeholder={t.login.identifierPlaceholder}
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">{t.login.passwordLabel}</label>
+                <label className="block text-slate-700 font-semibold mb-1.5">{t.login.passwordLabel}</label>
                 <input
                   type="password"
                   required
                   placeholder={t.login.passwordPlaceholder}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoggingIn}
-                className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition shadow-md shadow-blue-600/25 flex items-center justify-center space-x-2"
+                className="w-full py-3 px-4 rounded-full bg-[#111827] hover:bg-[#ff6600] text-white font-bold text-xs sm:text-sm transition shadow-md hover:-translate-y-0.5 flex items-center justify-center space-x-2 cursor-pointer"
               >
                 {isLoggingIn ? (
                   <>
@@ -953,14 +964,14 @@ function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
             </form>
 
             {/* Lecturer Quick Access */}
-            <div className="pt-3 border-t border-slate-800 text-center">
+            <div className="pt-4 border-t border-slate-100 text-center">
               <button
                 type="button"
                 onClick={() => {
                   setIdentifier('teacher@maths.lk');
                   setPassword('admin');
                 }}
-                className="text-[11px] text-blue-400 hover:text-blue-300 hover:underline"
+                className="text-xs font-semibold text-[#ff6600] hover:underline cursor-pointer"
               >
                 {t.login.adminQuickFill}
               </button>
@@ -972,81 +983,81 @@ function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
         {activeTab === 'register' && (
           <form onSubmit={handleRegisterSubmit} className="space-y-3.5 text-xs">
             {displayRegError && (
-              <div className="p-3 bg-rose-950/70 border border-rose-500/40 rounded-xl text-xs text-rose-300">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium">
                 {displayRegError}
               </div>
             )}
 
             <div>
-              <label className="block text-slate-300 font-medium mb-1.5">{t.login.fullNameLabel}</label>
+              <label className="block text-slate-700 font-semibold mb-1.5">{t.login.fullNameLabel}</label>
               <input
                 type="text"
                 required
                 placeholder={t.login.fullNamePlaceholder}
                 value={regName}
                 onChange={(e) => setRegName(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">{t.login.indexNoLabel}</label>
+                <label className="block text-slate-700 font-semibold mb-1.5">{t.login.indexNoLabel}</label>
                 <input
                   type="text"
                   required
                   placeholder={t.login.indexNoPlaceholder}
                   value={regIndexNo}
                   onChange={(e) => setRegIndexNo(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs font-mono text-slate-100 placeholder-slate-500 transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 transition"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">{t.login.phoneLabel}</label>
+                <label className="block text-slate-700 font-semibold mb-1.5">{t.login.phoneLabel}</label>
                 <input
                   type="tel"
                   required
                   placeholder={t.login.phonePlaceholder}
                   value={regPhone}
                   onChange={(e) => setRegPhone(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-medium mb-1.5">{t.login.emailLabel}</label>
+              <label className="block text-slate-700 font-semibold mb-1.5">{t.login.emailLabel}</label>
               <input
                 type="email"
                 required
                 placeholder={t.login.emailPlaceholder}
                 value={regEmail}
                 onChange={(e) => setRegEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">{t.login.regPasswordLabel}</label>
+                <label className="block text-slate-700 font-semibold mb-1.5">{t.login.regPasswordLabel}</label>
                 <input
                   type="password"
                   required
                   placeholder={t.login.regPasswordPlaceholder}
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 font-medium mb-1.5">{t.login.confirmPasswordLabel}</label>
+                <label className="block text-slate-700 font-semibold mb-1.5">{t.login.confirmPasswordLabel}</label>
                 <input
                   type="password"
                   required
                   placeholder={t.login.confirmPasswordPlaceholder}
                   value={regConfirmPassword}
                   onChange={(e) => setRegConfirmPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#090d16] border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs text-slate-100 placeholder-slate-500 transition"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 transition"
                 />
               </div>
             </div>
@@ -1054,7 +1065,7 @@ function MoodleLoginPage({ onLogin, presetUsers, lang, setLang, t }) {
             <button
               type="submit"
               disabled={isRegistering}
-              className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shadow-md shadow-emerald-600/25 flex items-center justify-center space-x-2"
+              className="w-full py-3 px-4 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs sm:text-sm transition shadow-md shadow-orange-500/25 hover:-translate-y-0.5 flex items-center justify-center space-x-2 cursor-pointer"
             >
               {isRegistering ? (
                 <>
@@ -1104,16 +1115,17 @@ function MoodleCoursesView({
 
   return (
     <div className="space-y-6">
-      {/* Course Banner */}
-      <div className="bg-[#111827] rounded-2xl border border-slate-800 p-6 md:p-7 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-        <div>
-          <span className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">
+      {/* Course Banner (SwiftDrop Signature Vibrant Orange Gradient Card) */}
+      <div className="relative rounded-3xl bg-gradient-to-r from-[#ff7a00] via-[#ff8c00] to-[#ffb800] p-6 sm:p-8 text-white overflow-hidden shadow-lg shadow-orange-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+        <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-white/15 blur-2xl pointer-events-none" />
+        <div className="relative z-10">
+          <span className="inline-block text-[10px] font-black uppercase tracking-widest bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full mb-2.5">
             {t.common.courseFullTitle}
           </span>
-          <h2 className="text-xl md:text-2xl font-bold text-slate-100 tracking-tight mt-1">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-tight">
             {t.courses.bannerHeading}
           </h2>
-          <p className="text-xs text-slate-400 mt-1.5 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-white/90 mt-1.5 max-w-2xl leading-relaxed font-normal">
             {t.courses.bannerDesc}
           </p>
         </div>
@@ -1121,7 +1133,7 @@ function MoodleCoursesView({
         {currentUser.role === 'teacher' && (
           <button
             onClick={onOpenAddPaperModal}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shrink-0 shadow-md shadow-blue-600/25"
+            className="relative z-10 flex items-center space-x-2 px-5 py-2.5 rounded-full bg-white hover:bg-orange-50 text-[#ff6600] font-black text-xs sm:text-sm transition shrink-0 shadow-md cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             <span>{t.courses.addExamPaperBtn}</span>
@@ -1132,51 +1144,53 @@ function MoodleCoursesView({
       {/* Sidebar + Papers Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Sidebar: Class Sections */}
-        <aside className="lg:col-span-4 bg-[#111827] rounded-2xl border border-slate-800 shadow-xl overflow-hidden lg:sticky lg:top-20">
-          <div className="p-4 border-b border-slate-800 bg-[#0c1222] flex items-center justify-between">
-            <h3 className="font-bold text-sm text-slate-200 flex items-center space-x-2">
-              <Layers className="w-4 h-4 text-blue-400" />
+        <aside className="lg:col-span-4 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] overflow-hidden lg:sticky lg:top-24">
+          <div className="p-4 sm:px-5 border-b border-slate-100 bg-[#fffaf4]/70 flex items-center justify-between">
+            <h3 className="font-black text-sm text-slate-900 flex items-center space-x-2.5">
+              <span className="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200/80 text-[#ff6600] flex items-center justify-center shrink-0">
+                <Layers className="w-4 h-4" />
+              </span>
               <span>{t.sections.sidebarTitle}</span>
             </h3>
-            <span className="text-[11px] font-mono text-slate-400">
+            <span className="text-[11px] font-black font-mono px-2.5 py-0.5 rounded-full bg-orange-50 text-[#ff6600] border border-orange-200/80">
               {PAPER_SECTIONS.length}
             </span>
           </div>
 
           <nav
-            className="p-2.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-1.5"
+            className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-1.5"
             aria-label={t.sections.sidebarTitle}
           >
             {/* All Sections */}
             <button
               type="button"
               onClick={() => onSelectSection('ALL')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition border text-left col-span-2 sm:col-span-3 lg:col-span-1 ${
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition border text-left col-span-2 sm:col-span-3 lg:col-span-1 cursor-pointer ${
                 selectedSection === 'ALL'
-                  ? 'bg-blue-600/20 text-blue-300 border-blue-500/40 shadow-xs'
-                  : 'text-slate-300 border-transparent hover:bg-slate-800/60 hover:text-slate-100'
+                  ? 'bg-[#ff6600] text-white border-transparent shadow-md shadow-orange-500/20'
+                  : 'text-slate-600 border-transparent hover:bg-orange-50/60 hover:text-slate-900'
               }`}
             >
               <span className="flex items-center space-x-2.5 min-w-0">
                 <LayoutGrid
                   className={`w-4 h-4 shrink-0 ${
-                    selectedSection === 'ALL' ? 'text-blue-400' : 'text-slate-400'
+                    selectedSection === 'ALL' ? 'text-white' : 'text-slate-400'
                   }`}
                 />
                 <span className="truncate">{t.sections.allSections}</span>
               </span>
               <span
-                className={`ml-2 px-2 py-0.5 rounded-md font-mono text-[11px] shrink-0 ${
+                className={`ml-2 px-2 py-0.5 rounded-full font-mono text-[11px] shrink-0 ${
                   selectedSection === 'ALL'
-                    ? 'bg-blue-500/25 text-blue-200'
-                    : 'bg-slate-800 text-slate-400'
+                    ? 'bg-white/25 text-white'
+                    : 'bg-slate-100 text-slate-600'
                 }`}
               >
                 {papers.length}
               </span>
             </button>
 
-            <div className="hidden lg:block my-1 border-t border-slate-800/80" />
+            <div className="hidden lg:block my-1.5 border-t border-slate-100" />
 
             {/* 6 Individual Sections */}
             {PAPER_SECTIONS.map((sec) => {
@@ -1190,27 +1204,27 @@ function MoodleCoursesView({
                   key={sec}
                   type="button"
                   onClick={() => onSelectSection(sec)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition border text-left ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition border text-left cursor-pointer ${
                     isSelected
-                      ? 'bg-blue-600/20 text-blue-300 border-blue-500/40 shadow-xs'
-                      : 'text-slate-300 border-transparent hover:bg-slate-800/60 hover:text-slate-100'
+                      ? 'bg-[#ff6600] text-white border-transparent shadow-md shadow-orange-500/20'
+                      : 'text-slate-600 border-transparent hover:bg-orange-50/60 hover:text-slate-900'
                   }`}
                 >
                   <span className="flex items-center space-x-2.5 min-w-0">
                     <IconComp
                       className={`w-4 h-4 shrink-0 ${
-                        isSelected ? 'text-blue-400' : 'text-slate-400'
+                        isSelected ? 'text-white' : 'text-slate-400'
                       }`}
                     />
                     <span className="truncate">{label}</span>
                   </span>
                   <span
-                    className={`ml-2 px-2 py-0.5 rounded-md font-mono text-[11px] shrink-0 ${
+                    className={`ml-2 px-2 py-0.5 rounded-full font-mono text-[11px] shrink-0 ${
                       isSelected
-                        ? 'bg-blue-500/25 text-blue-200'
+                        ? 'bg-white/25 text-white'
                         : count > 0
-                        ? 'bg-slate-800 text-slate-300'
-                        : 'bg-slate-900 text-slate-500'
+                        ? 'bg-orange-50 text-[#ff6600]'
+                        : 'bg-slate-100 text-slate-400'
                     }`}
                   >
                     {count}
@@ -1222,29 +1236,31 @@ function MoodleCoursesView({
         </aside>
 
         {/* Right Content: Filtered Papers Table */}
-        <section className="lg:col-span-8 bg-[#111827] rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
-          <div className="p-4 md:px-6 border-b border-slate-800 bg-[#0c1222] flex items-center justify-between gap-3 flex-wrap">
-            <h3 className="font-bold text-sm text-slate-200 flex items-center space-x-2.5">
-              <ActiveHeaderIcon className="w-4 h-4 text-blue-400 shrink-0" />
+        <section className="lg:col-span-8 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] overflow-hidden">
+          <div className="p-4 sm:px-6 border-b border-slate-100 bg-[#fffaf4]/70 flex items-center justify-between gap-3 flex-wrap">
+            <h3 className="font-black text-sm sm:text-base text-slate-900 flex items-center space-x-2.5">
+              <span className="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200/80 text-[#ff6600] flex items-center justify-center shrink-0">
+                <ActiveHeaderIcon className="w-4 h-4" />
+              </span>
               <span>{activeSectionLabel}</span>
             </h3>
-            <span className="text-xs text-slate-400 font-mono px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/60">
+            <span className="text-xs text-[#ff6600] font-black font-mono px-3 py-1 rounded-full bg-orange-50 border border-orange-200/80">
               {t.courses.papersActive(filteredPapers.length)}
             </span>
           </div>
 
           {filteredPapers.length === 0 ? (
-            <div className="p-12 md:p-16 text-center space-y-3.5">
-              <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700/80 text-slate-400 mx-auto flex items-center justify-center">
-                <ActiveHeaderIcon className="w-7 h-7 text-blue-400" />
+            <div className="p-12 md:p-16 text-center space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-200/80 text-[#ff6600] mx-auto flex items-center justify-center shadow-xs">
+                <ActiveHeaderIcon className="w-7 h-7" />
               </div>
               <div>
-                <h4 className="font-bold text-base text-slate-200">
+                <h4 className="font-black text-base text-slate-900">
                   {selectedSection === 'ALL'
                     ? t.courses.emptyTitle
                     : t.courses.emptyInSectionTitle(activeSectionLabel)}
                 </h4>
-                <p className="text-xs text-slate-400 mt-1.5 max-w-md mx-auto leading-relaxed">
+                <p className="text-xs text-slate-500 mt-1.5 max-w-md mx-auto leading-relaxed">
                   {selectedSection === 'ALL'
                     ? currentUser.role === 'teacher'
                       ? t.courses.emptyTeacherDesc
@@ -1257,7 +1273,7 @@ function MoodleCoursesView({
               {currentUser.role === 'teacher' && (
                 <button
                   onClick={onOpenAddPaperModal}
-                  className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-md shadow-blue-600/25 mt-2"
+                  className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs transition shadow-md shadow-orange-500/25 mt-2 cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" />
                   <span>{t.courses.addModelPaperBtn}</span>
@@ -1265,7 +1281,7 @@ function MoodleCoursesView({
               )}
             </div>
           ) : (
-            <div className="divide-y divide-slate-800/80">
+            <div className="divide-y divide-slate-100">
               {filteredPapers.map((paper) => {
                 const studentSub = submissions.find(
                   (s) => s.paperId === paper.id && s.studentIndex === currentUser.indexNo
@@ -1273,53 +1289,53 @@ function MoodleCoursesView({
                 const secKey = getPaperSection(paper);
                 const secBadgeStyle =
                   SECTION_STYLES[secKey]?.badgeClass ||
-                  'bg-slate-800 text-slate-300 border-slate-700';
+                  'bg-slate-100 text-slate-700 border-slate-200';
                 const secLabel = t.sections.items[secKey] || secKey;
 
                 return (
                   <div
                     key={paper.id}
-                    className="p-5 md:px-6 hover:bg-[#161f38]/40 transition flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group"
+                    className="p-5 md:px-6 hover:bg-orange-50/30 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group"
                   >
                     <div
                       className="flex items-start space-x-3.5 cursor-pointer flex-1 min-w-0"
                       onClick={() => onSelectPaper(paper.id)}
                     >
-                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 text-blue-400 mt-0.5 group-hover:scale-105 transition">
+                      <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/80 flex items-center justify-center shrink-0 text-[#ff6600] mt-0.5 group-hover:bg-[#ff6600] group-hover:text-white group-hover:scale-105 transition-all">
                         <FileText className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="font-semibold text-sm text-blue-400 group-hover:text-blue-300 flex items-center gap-2 flex-wrap">
+                        <h4 className="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-[#ff6600] transition-colors flex items-center gap-2 flex-wrap">
                           <span>{paper.title}</span>
-                          <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                          <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                             {paper.code}
                           </span>
                           <span
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${secBadgeStyle}`}
+                            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${secBadgeStyle}`}
                           >
                             {secLabel}
                           </span>
                         </h4>
-                        <p className="text-xs text-slate-400 mt-1 line-clamp-1">
+                        <p className="text-xs text-slate-500 mt-1 line-clamp-1">
                           {paper.instructions}
                         </p>
-                        <div className="flex items-center space-x-3 text-[11px] text-slate-400 mt-2 flex-wrap gap-y-1">
+                        <div className="flex items-center space-x-3 text-[11px] text-slate-500 mt-2 flex-wrap gap-y-1">
                           <span>
                             {t.courses.durationLabel}{' '}
-                            <b className="text-slate-200 font-mono">
+                            <b className="text-slate-900 font-mono">
                               {t.common.minsUnit(paper.durationMinutes)}
                             </b>
                           </span>
-                          <span>&bull;</span>
+                          <span className="text-slate-300">&bull;</span>
                           <span>
                             {t.courses.graceLabel}{' '}
-                            <b className="text-slate-200 font-mono">
+                            <b className="text-slate-900 font-mono">
                               +{t.common.minsUnit(paper.gracePeriodMinutes)}
                             </b>
                           </span>
-                          <span>&bull;</span>
+                          <span className="text-slate-300">&bull;</span>
                           <span>
-                            {t.courses.dueLabel} <b className="text-slate-300">{paper.dueDate}</b>
+                            {t.courses.dueLabel} <b className="text-slate-800">{paper.dueDate}</b>
                           </span>
                         </div>
                       </div>
@@ -1330,7 +1346,7 @@ function MoodleCoursesView({
                         studentSub ? (
                           <button
                             onClick={() => onSelectPaper(paper.id)}
-                            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition font-mono"
+                            className="text-xs font-bold px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition font-mono cursor-pointer"
                           >
                             {studentSub.marks !== null
                               ? t.courses.gradedBadge(studentSub.marks, paper.totalMarks)
@@ -1339,7 +1355,7 @@ function MoodleCoursesView({
                         ) : (
                           <button
                             onClick={() => onSelectPaper(paper.id)}
-                            className="text-xs font-semibold px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition shadow-md shadow-blue-600/20 flex items-center space-x-1.5"
+                            className="text-xs font-bold px-4 py-2 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white transition shadow-md shadow-orange-500/20 flex items-center space-x-1.5 cursor-pointer"
                           >
                             <span>{t.courses.startExamBtn}</span>
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -1349,7 +1365,7 @@ function MoodleCoursesView({
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => onOpenGrading(paper.id)}
-                            className="text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg border border-blue-500/20 transition"
+                            className="text-xs font-bold text-[#ff6600] bg-orange-50 hover:bg-[#ff6600] hover:text-white px-4 py-2 rounded-full border border-orange-200 transition cursor-pointer"
                           >
                             {t.courses.submissionsAndGradeBtn}
                           </button>
@@ -1359,7 +1375,7 @@ function MoodleCoursesView({
                               onDeletePaper(paper.id);
                             }}
                             title={t.courses.deletePaperTitle}
-                            className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition border border-transparent hover:border-rose-500/20"
+                            className="p-2 rounded-full text-rose-500 hover:bg-rose-50 transition border border-transparent hover:border-rose-200 cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1503,76 +1519,84 @@ function MoodleExamAssignmentView({
   return (
     <div className="space-y-5">
       {/* Breadcrumbs */}
-      <div className="flex items-center justify-between text-xs text-blue-400">
+      <div className="flex items-center justify-between text-xs font-bold text-slate-500">
         <div className="flex items-center space-x-2 flex-wrap">
-          <button onClick={onBack} className="hover:text-blue-300 transition">{t.common.courseFullTitle}</button>
-          <span className="text-slate-600">&gt;</span>
-          <button onClick={onBack} className="hover:text-blue-300 transition font-mono">{paper.code}</button>
-          <span className="text-slate-600">&gt;</span>
-          <span className="text-slate-300 font-medium">{paper.title}</span>
+          <button onClick={onBack} className="hover:text-[#ff6600] transition cursor-pointer">{t.common.courseFullTitle}</button>
+          <span className="text-slate-300">&gt;</span>
+          <button onClick={onBack} className="hover:text-[#ff6600] transition font-mono">{paper.code}</button>
+          <span className="text-slate-300">&gt;</span>
+          <span className="text-slate-900 font-extrabold">{paper.title}</span>
         </div>
 
-        <button onClick={onBack} className="text-blue-400 hover:text-blue-300 hover:underline flex items-center space-x-1">
+        <button onClick={onBack} className="text-[#ff6600] hover:underline flex items-center space-x-1 cursor-pointer">
           <span>&larr; {t.assignment.backToPapers}</span>
         </button>
       </div>
 
       {/* Header */}
       <div className="flex items-center space-x-3 pt-1">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+        <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/80 flex items-center justify-center text-[#ff6600] shrink-0">
           <FileText className="w-5 h-5" />
         </div>
-        <h1 className="text-xl md:text-2xl font-bold text-slate-100 tracking-tight">
+        <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
           {paper.title}
         </h1>
       </div>
 
       {/* ACTIVE EXAM RUNNING: Sticky Countdown Header */}
       {activeSession && (
-        <div className={`p-4 md:p-5 rounded-2xl border transition-all shadow-xl ${
+        <div className={`p-4 md:p-5 rounded-3xl border transition-all shadow-lg ${
           isHardExpired
-            ? 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+            ? 'bg-red-50 border-red-200 text-red-900'
             : isWritingOver
-            ? 'bg-amber-950/40 border-amber-500/50 text-amber-300 animate-pulse shadow-amber-950/20'
-            : 'bg-gradient-to-r from-[#0c1322] to-[#111827] border-blue-500/30 text-blue-400 shadow-blue-950/30'
+            ? 'bg-amber-50 border-amber-300 text-amber-950 animate-pulse shadow-amber-500/15'
+            : 'bg-gradient-to-r from-[#111827] to-[#1e293b] border-[#ff6600]/60 text-white shadow-orange-500/10'
         }`}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-3.5 w-full sm:w-auto">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${
                 isHardExpired 
-                  ? 'bg-rose-500/20 border-rose-500/30 text-rose-400' 
+                  ? 'bg-red-100 border-red-200 text-red-600' 
                   : isWritingOver 
-                  ? 'bg-amber-500/20 border-amber-500/30 text-amber-300' 
-                  : 'bg-blue-500/15 border-blue-500/30 text-blue-400'
+                  ? 'bg-amber-100 border-amber-300 text-amber-700' 
+                  : 'bg-[#ff6600] border-[#ff6600] text-white shadow-md shadow-orange-500/30'
               }`}>
                 <Clock className="w-6 h-6" />
               </div>
               <div>
-                <span className="text-[11px] font-semibold uppercase tracking-wider block text-slate-400">
+                <span className={`text-[11px] font-bold uppercase tracking-wider block ${
+                  isHardExpired ? 'text-red-600' : isWritingOver ? 'text-amber-700' : 'text-slate-300'
+                }`}>
                   {isHardExpired 
                     ? t.assignment.statusTerminated
                     : isWritingOver 
                     ? t.assignment.statusGrace
                     : t.assignment.statusWriting}
                 </span>
-                <span className="text-2xl md:text-3xl font-bold font-mono tracking-tight text-white">
+                <span className={`text-2xl md:text-3xl font-black font-mono tracking-tight ${
+                  isHardExpired ? 'text-red-700' : isWritingOver ? 'text-amber-900' : 'text-white'
+                }`}>
                   {isWritingOver ? formatTime(hardSecondsLeft) : formatTime(writingSecondsLeft)}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center space-x-3 text-xs">
-              <span className={`px-2.5 py-1 rounded-lg font-mono text-xs ${
+              <span className={`px-3 py-1 rounded-full font-mono font-bold text-xs ${
                 activeSession.tabSwitches > 0 
-                  ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300' 
-                  : 'bg-slate-800 border border-slate-700 text-slate-400'
+                  ? 'bg-red-100 border border-red-200 text-red-700' 
+                  : isHardExpired || isWritingOver
+                  ? 'bg-white border border-slate-200 text-slate-700'
+                  : 'bg-white/10 border border-white/15 text-slate-200'
               }`}>
                 {t.assignment.tabSwitches(activeSession.tabSwitches || 0)}
               </span>
 
               <button
                 onClick={onCancelExam}
-                className="text-rose-400 hover:text-rose-300 hover:underline text-xs"
+                className={`hover:underline text-xs font-bold cursor-pointer ${
+                  isHardExpired || isWritingOver ? 'text-red-600' : 'text-orange-300 hover:text-orange-200'
+                }`}
               >
                 {t.assignment.abandonExam}
               </button>
@@ -1582,56 +1606,56 @@ function MoodleExamAssignmentView({
       )}
 
       {/* Main Card */}
-      <div className="bg-[#111827] rounded-2xl border border-slate-800 shadow-xl p-6 md:p-8 space-y-6">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-6 md:p-8 space-y-6">
         
         {/* Meta Info */}
-        <div className="text-xs text-slate-400 space-y-1.5 pb-5 border-b border-slate-800">
+        <div className="text-xs text-slate-500 space-y-2 pb-5 border-b border-slate-100">
           <div>
-            <b>{t.sections.sectionLabel}</b>{' '}
-            <span className={`inline-block text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
-              SECTION_STYLES[getPaperSection(paper)]?.badgeClass || 'bg-slate-800 text-slate-300 border-slate-700'
+            <b className="text-slate-700">{t.sections.sectionLabel}</b>{' '}
+            <span className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+              SECTION_STYLES[getPaperSection(paper)]?.badgeClass || 'bg-slate-100 text-slate-700 border-slate-200'
             }`}>
               {t.sections.items[getPaperSection(paper)] || getPaperSection(paper)}
             </span>
           </div>
-          <div><b>{t.assignment.openedLabel}</b> <span className="text-slate-300">{paper.openedDate}</span></div>
-          <div><b>{t.assignment.dueLabel}</b> <span className="text-slate-300">{paper.dueDate}</span></div>
-          <div className="text-blue-400">
-            <b>{t.assignment.strictTimeLabel}</b> <span className="font-mono text-blue-300">{t.assignment.strictTimeValue(paper.durationMinutes, paper.gracePeriodMinutes)}</span>
+          <div><b className="text-slate-700">{t.assignment.openedLabel}</b> <span className="text-slate-900 font-medium">{paper.openedDate}</span></div>
+          <div><b className="text-slate-700">{t.assignment.dueLabel}</b> <span className="text-slate-900 font-medium">{paper.dueDate}</span></div>
+          <div className="text-[#ff6600]">
+            <b>{t.assignment.strictTimeLabel}</b> <span className="font-mono font-bold text-slate-900">{t.assignment.strictTimeValue(paper.durationMinutes, paper.gracePeriodMinutes)}</span>
           </div>
         </div>
 
         {/* Instructions */}
-        <div className="text-xs text-slate-300 leading-relaxed bg-[#0c1222] p-4 rounded-xl border border-slate-800/80">
+        <div className="text-xs text-slate-700 leading-relaxed bg-[#f8f8f6] p-4 rounded-2xl border border-slate-200/70">
           {paper.instructions}
         </div>
 
         {/* ------------------------------------------------------------- */}
-        {/* CASE 1: TEACHER VIEW -> Shows Moodle Grading Summary Block    */}
+        {/* CASE 1: TEACHER VIEW -> Shows Grading Summary Block           */}
         {/* ------------------------------------------------------------- */}
         {currentUser.role === 'teacher' ? (
-          <div className="pt-4 border-t border-slate-800 space-y-4">
-            <h3 className="font-bold text-base text-slate-100">{t.assignment.gradingSummaryTitle}</h3>
+          <div className="pt-4 border-t border-slate-100 space-y-4">
+            <h3 className="font-black text-base text-slate-900 tracking-tight">{t.assignment.gradingSummaryTitle}</h3>
             
-            <div className="border border-slate-800 rounded-xl overflow-hidden text-xs">
-              <div className="grid grid-cols-2 p-3 bg-[#0c1222] border-b border-slate-800">
-                <span className="font-semibold text-slate-400">{t.assignment.participantsLabel}</span>
-                <span className="font-medium text-slate-200">{t.assignment.participantsValue}</span>
+            <div className="border border-slate-100 rounded-2xl overflow-hidden text-xs">
+              <div className="grid grid-cols-2 p-3.5 bg-slate-50/80 border-b border-slate-100">
+                <span className="font-bold text-slate-500">{t.assignment.participantsLabel}</span>
+                <span className="font-bold text-slate-900">{t.assignment.participantsValue}</span>
               </div>
-              <div className="grid grid-cols-2 p-3 bg-[#111827] border-b border-slate-800">
-                <span className="font-semibold text-slate-400">{t.assignment.submittedLabel}</span>
-                <span className="font-medium text-slate-200 font-mono">{t.assignment.submittedValue}</span>
+              <div className="grid grid-cols-2 p-3.5 bg-white border-b border-slate-100">
+                <span className="font-bold text-slate-500">{t.assignment.submittedLabel}</span>
+                <span className="font-bold text-emerald-600 font-mono">{t.assignment.submittedValue}</span>
               </div>
-              <div className="grid grid-cols-2 p-3 bg-[#0c1222] border-b border-slate-800">
-                <span className="font-semibold text-slate-400">{t.assignment.questionPaperPdfLabel}</span>
-                <span className="font-medium text-blue-400 font-mono">{paper.pdfFileName}</span>
+              <div className="grid grid-cols-2 p-3.5 bg-slate-50/80">
+                <span className="font-bold text-slate-500">{t.assignment.questionPaperPdfLabel}</span>
+                <span className="font-bold text-[#ff6600] font-mono">{paper.pdfFileName}</span>
               </div>
             </div>
 
             <div className="flex items-center space-x-3 pt-2">
               <button
                 onClick={onViewAllSubmissions}
-                className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-md shadow-blue-600/20"
+                className="px-5 py-2.5 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs transition shadow-md shadow-orange-500/20 cursor-pointer"
               >
                 {t.assignment.viewAllSubmissionsBtn}
               </button>
@@ -1645,33 +1669,33 @@ function MoodleExamAssignmentView({
             
             {/* 2A: STUDENT HAS NOT STARTED EXAM YET (Paper is LOCKED!) */}
             {!activeSession && !submission && (
-              <div className="p-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 space-y-4">
+              <div className="p-6 rounded-3xl border border-orange-200/90 bg-gradient-to-b from-[#fffaf4] to-orange-50/50 space-y-4">
                 <div className="flex items-start space-x-3.5">
-                  <div className="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-2xl bg-[#ff6600] text-white flex items-center justify-center shrink-0 shadow-md shadow-orange-500/25">
                     <Lock className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-bold text-base text-amber-300">
+                    <h3 className="font-black text-base text-slate-900">
                       {t.assignment.lockedTitle}
                     </h3>
-                    <p className="text-xs text-slate-300 leading-relaxed">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       {t.assignment.lockedDescBefore}
-                      <b>{t.assignment.lockedDescBtnName}</b>
+                      <b className="text-slate-900">{t.assignment.lockedDescBtnName}</b>
                       {t.assignment.lockedDescMiddle}
-                      <b className="font-mono text-amber-200">{t.assignment.lockedDescDuration(paper.durationMinutes)}</b>
+                      <b className="font-mono text-[#ff6600]">{t.assignment.lockedDescDuration(paper.durationMinutes)}</b>
                       {t.assignment.lockedDescAfter}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-amber-500/20 flex items-center justify-between flex-wrap gap-3">
-                  <span className="text-xs font-semibold text-amber-300/90 font-mono">
+                <div className="pt-4 border-t border-orange-200/70 flex items-center justify-between flex-wrap gap-3">
+                  <span className="text-xs font-bold text-[#ff6600] font-mono bg-white px-3 py-1 rounded-full border border-orange-200/80">
                     {t.assignment.lockedDurationSummary(paper.durationMinutes, paper.gracePeriodMinutes)}
                   </span>
 
                   <button
                     onClick={onRequestStartExam}
-                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/25 flex items-center space-x-2 transition"
+                    className="px-6 py-2.5 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs shadow-md shadow-orange-500/25 flex items-center space-x-2 transition cursor-pointer"
                   >
                     <Unlock className="w-4 h-4" />
                     <span>{t.assignment.startExamViewPaperBtn}</span>
@@ -1682,12 +1706,12 @@ function MoodleExamAssignmentView({
 
             {/* 2B: STUDENT IS ACTIVELY WRITING EXAM (Paper is UNLOCKED & Timer is Running) */}
             {activeSession && (
-              <div className="space-y-6 border-t border-slate-800 pt-5">
+              <div className="space-y-6 border-t border-slate-100 pt-5">
                 {/* Unlocked Paper Viewer Header */}
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0c1222] border border-slate-800 text-xs flex-wrap gap-2">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#fffaf4] border border-orange-200/70 text-xs flex-wrap gap-2">
                   <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-blue-400" />
-                    <span className="font-semibold text-blue-400">
+                    <FileText className="w-4 h-4 text-[#ff6600]" />
+                    <span className="font-bold text-slate-900">
                       {t.assignment.unlockedPdfTitle}
                     </span>
                   </div>
@@ -1696,7 +1720,7 @@ function MoodleExamAssignmentView({
                     <button
                       type="button"
                       onClick={() => window.open(paper.pdfUrl, '_blank')}
-                      className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition shadow-xs"
+                      className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white text-xs font-bold transition shadow-xs cursor-pointer"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>{t.assignment.openInNewTab}</span>
@@ -1706,7 +1730,7 @@ function MoodleExamAssignmentView({
                       download={paper.pdfFileName || 'question-paper.pdf'}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"
+                      className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-orange-50 border border-slate-200 text-slate-700 hover:text-[#ff6600] text-xs font-bold transition"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>{t.common.download}</span>
@@ -1715,7 +1739,7 @@ function MoodleExamAssignmentView({
                 </div>
 
                 {/* Embedded PDF Viewer */}
-                <div className="w-full h-[580px] rounded-xl border border-slate-800 bg-slate-950 overflow-hidden shadow-inner">
+                <div className="w-full h-[580px] rounded-2xl border border-slate-200 bg-slate-100 overflow-hidden shadow-inner">
                   <iframe
                     src={`${paper.pdfUrl}#toolbar=1`}
                     title="Question Paper PDF"
@@ -1724,23 +1748,23 @@ function MoodleExamAssignmentView({
                 </div>
 
                 {/* Answer Upload Box */}
-                <div className="border border-slate-800 rounded-xl p-5 md:p-6 bg-[#0c1222] space-y-4">
+                <div className="border border-slate-100 rounded-3xl p-5 md:p-6 bg-[#fffaf4]/60 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-sm text-slate-100 flex items-center space-x-2">
-                      <UploadCloud className="w-4 h-4 text-blue-400" />
+                    <h3 className="font-black text-sm text-slate-900 flex items-center space-x-2">
+                      <UploadCloud className="w-4 h-4 text-[#ff6600]" />
                       <span>{t.assignment.answerSubmissionTitle}</span>
                     </h3>
                   </div>
 
                   {/* Mode Selector */}
-                  <div className="flex space-x-2">
+                  <div className="inline-flex p-1 rounded-xl bg-slate-100 gap-1">
                     <button
                       type="button"
                       onClick={() => setUploadMode('PDF')}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-medium border transition ${
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                         uploadMode === 'PDF' 
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
-                          : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-slate-200'
+                          ? 'bg-white text-[#ff6600] shadow-sm' 
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       {t.assignment.modeSinglePdf}
@@ -1748,10 +1772,10 @@ function MoodleExamAssignmentView({
                     <button
                       type="button"
                       onClick={() => setUploadMode('IMAGES')}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-medium border transition ${
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                         uploadMode === 'IMAGES' 
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
-                          : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-slate-200'
+                          ? 'bg-white text-[#ff6600] shadow-sm' 
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       {t.assignment.modeMultiplePhotos}
@@ -1760,7 +1784,7 @@ function MoodleExamAssignmentView({
 
                   {uploadMode === 'PDF' ? (
                     /* PDF Dropzone */
-                    <div className="border-2 border-dashed border-slate-700 hover:border-blue-500/60 rounded-xl p-6 bg-[#090d16] text-center transition">
+                    <div className="border-2 border-dashed border-slate-300 hover:border-[#ff6600] rounded-2xl p-6 bg-white text-center transition">
                       <input
                         type="file"
                         id="student-answer-pdf"
@@ -1769,18 +1793,18 @@ function MoodleExamAssignmentView({
                         className="hidden"
                       />
                       <label htmlFor="student-answer-pdf" className="cursor-pointer flex flex-col items-center justify-center space-y-2.5">
-                        <div className="w-11 h-11 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center shadow-xs">
+                        <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/80 text-[#ff6600] flex items-center justify-center shadow-xs">
                           <ArrowDown className="w-5 h-5 stroke-[2.5]" />
                         </div>
                         {selectedFile ? (
                           <div className="text-xs">
-                            <span className="font-semibold text-emerald-400 block font-mono">{selectedFile.name}</span>
-                            <span className="text-slate-400">{selectedFile.size} &bull; {t.assignment.readyToSubmit}</span>
+                            <span className="font-bold text-emerald-600 block font-mono">{selectedFile.name}</span>
+                            <span className="text-slate-500">{selectedFile.size} &bull; {t.assignment.readyToSubmit}</span>
                           </div>
                         ) : (
-                          <div className="text-xs text-slate-300">
-                            <span className="font-medium block text-slate-200">{t.assignment.selectSinglePdfTitle}</span>
-                            <span className="text-[11px] text-slate-500">{t.assignment.selectSinglePdfHint}</span>
+                          <div className="text-xs text-slate-600">
+                            <span className="font-bold block text-slate-900">{t.assignment.selectSinglePdfTitle}</span>
+                            <span className="text-[11px] text-slate-400">{t.assignment.selectSinglePdfHint}</span>
                           </div>
                         )}
                       </label>
@@ -1788,7 +1812,7 @@ function MoodleExamAssignmentView({
                   ) : (
                     /* Multi Photos Dropzone */
                     <div className="space-y-3">
-                      <div className="border-2 border-dashed border-slate-700 hover:border-blue-500/60 rounded-xl p-6 bg-[#090d16] text-center transition">
+                      <div className="border-2 border-dashed border-slate-300 hover:border-[#ff6600] rounded-2xl p-6 bg-white text-center transition">
                         <input
                           type="file"
                           id="student-answer-images"
@@ -1798,20 +1822,20 @@ function MoodleExamAssignmentView({
                           className="hidden"
                         />
                         <label htmlFor="student-answer-images" className="cursor-pointer flex flex-col items-center justify-center space-y-2 text-xs">
-                          <div className="w-11 h-11 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center">
+                          <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/80 text-[#ff6600] flex items-center justify-center">
                             <ArrowDown className="w-5 h-5" />
                           </div>
-                          <span className="font-medium text-slate-200">{t.assignment.selectMultiPhotosTitle}</span>
-                          <span className="text-[11px] text-slate-500">{t.assignment.selectMultiPhotosHint}</span>
+                          <span className="font-bold text-slate-900">{t.assignment.selectMultiPhotosTitle}</span>
+                          <span className="text-[11px] text-slate-400">{t.assignment.selectMultiPhotosHint}</span>
                         </label>
                       </div>
 
                       {selectedImages.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                           {selectedImages.map((img, idx) => (
-                            <div key={img.id} className="p-2.5 rounded-lg bg-[#090d16] border border-slate-800 flex items-center justify-between">
-                              <span className="truncate max-w-[100px] text-slate-300 font-mono">{t.assignment.pagePrefix(idx + 1)} {img.name}</span>
-                              <button onClick={() => removeImage(img.id)} className="text-rose-400 p-1 hover:text-rose-300"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <div key={img.id} className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between">
+                              <span className="truncate max-w-[100px] text-slate-700 font-mono">{t.assignment.pagePrefix(idx + 1)} {img.name}</span>
+                              <button onClick={() => removeImage(img.id)} className="text-rose-500 p-1 hover:text-rose-600 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           ))}
                         </div>
@@ -1824,12 +1848,12 @@ function MoodleExamAssignmentView({
                     <button
                       onClick={triggerSubmit}
                       disabled={!canSubmit || isHardExpired || isSubmitting}
-                      className={`px-5 py-2.5 rounded-xl font-semibold text-xs transition flex items-center space-x-2 ${
+                      className={`px-6 py-2.5 rounded-full font-bold text-xs transition flex items-center space-x-2 ${
                         !canSubmit || isHardExpired
-                          ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+                          ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                           : isSubmitting
-                          ? 'bg-blue-700 text-white'
-                          : 'bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/25'
+                          ? 'bg-[#e65c00] text-white'
+                          : 'bg-[#ff9900] hover:bg-[#ff8800] text-white shadow-md shadow-orange-500/25 cursor-pointer'
                       }`}
                     >
                       {isSubmitting ? (
@@ -1851,90 +1875,90 @@ function MoodleExamAssignmentView({
 
             {/* 2C: SUBMISSION STATUS TABLE */}
             <div className="space-y-3.5 pt-3">
-              <h3 className="font-bold text-lg text-slate-100 tracking-tight">
+              <h3 className="font-black text-lg text-slate-900 tracking-tight">
                 {t.assignment.submissionStatusTitle}
               </h3>
 
-              <div className="border border-slate-800 rounded-xl overflow-hidden text-xs">
+              <div className="border border-slate-100 rounded-2xl overflow-hidden text-xs">
                 <table className="w-full text-left border-collapse">
                   <tbody>
-                    <tr className="border-b border-slate-800">
-                      <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
+                    <tr className="border-b border-slate-100">
+                      <td className="w-1/3 p-3.5 font-bold text-slate-500 bg-slate-50/80 border-r border-slate-100">
                         {t.assignment.rowSubmissionStatus}
                       </td>
-                      <td className={`p-3.5 ${submission ? 'bg-emerald-500/10 text-emerald-400 font-semibold' : 'text-slate-300'}`}>
+                      <td className={`p-3.5 ${submission ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-600'}`}>
                         {submission ? t.assignment.submittedForGrading : t.assignment.noSubmissionsYet}
                       </td>
                     </tr>
 
-                    <tr className="border-b border-slate-800">
-                      <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
+                    <tr className="border-b border-slate-100">
+                      <td className="w-1/3 p-3.5 font-bold text-slate-500 bg-slate-50/80 border-r border-slate-100">
                         {t.assignment.rowGradingStatus}
                       </td>
-                      <td className="p-3.5 text-slate-300">
+                      <td className="p-3.5 text-slate-700">
                         {submission && submission.marks !== null ? (
-                          <span className="font-bold text-emerald-400 font-mono">
+                          <span className="font-black text-emerald-600 font-mono">
                             {t.assignment.gradedValue(submission.marks, paper.totalMarks)}
                           </span>
                         ) : (
-                          <span className="text-slate-500">{t.assignment.notGraded}</span>
+                          <span className="text-slate-400">{t.assignment.notGraded}</span>
                         )}
                       </td>
                     </tr>
 
-                    <tr className="border-b border-slate-800">
-                      <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
+                    <tr className="border-b border-slate-100">
+                      <td className="w-1/3 p-3.5 font-bold text-slate-500 bg-slate-50/80 border-r border-slate-100">
                         {t.assignment.rowTimeRemaining}
                       </td>
-                      <td className="p-3.5 text-slate-300 font-mono">
+                      <td className="p-3.5 text-slate-700 font-mono">
                         {submission ? (
-                          <span className="text-emerald-400 font-medium">{t.assignment.assignmentSubmitted}</span>
+                          <span className="text-emerald-600 font-bold">{t.assignment.assignmentSubmitted}</span>
                         ) : activeSession ? (
-                          <span className="text-blue-400 font-semibold">{t.assignment.timeLeftSuffix(formatTime(hardSecondsLeft))}</span>
+                          <span className="text-[#ff6600] font-bold">{t.assignment.timeLeftSuffix(formatTime(hardSecondsLeft))}</span>
                         ) : (
-                          <span className="text-slate-400">{t.assignment.availableByDueDate}</span>
+                          <span className="text-slate-500">{t.assignment.availableByDueDate}</span>
                         )}
                       </td>
                     </tr>
 
-                    <tr className="border-b border-slate-800">
-                      <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
+                    <tr className="border-b border-slate-100">
+                      <td className="w-1/3 p-3.5 font-bold text-slate-500 bg-slate-50/80 border-r border-slate-100">
                         {t.assignment.rowLastModified}
                       </td>
-                      <td className="p-3.5 text-slate-300 font-mono">
+                      <td className="p-3.5 text-slate-700 font-mono">
                         {submission ? submission.submittedAt : '-'}
                       </td>
                     </tr>
 
                     {submission && (
-                      <tr className="border-b border-slate-800">
-                        <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
+                      <tr className="border-b border-slate-100">
+                        <td className="w-1/3 p-3.5 font-bold text-slate-500 bg-slate-50/80 border-r border-slate-100">
                           {t.assignment.rowFileSubmissions}
                         </td>
-                        <td className="p-3.5 text-slate-300">
-                          <div className="flex items-center space-x-2 text-blue-400 font-mono">
-                            <FileText className="w-4 h-4 text-rose-400" />
-                            <span className="hover:underline cursor-pointer font-medium">
+                        <td className="p-3.5 text-slate-800">
+                          <div className="flex items-center space-x-2 text-[#ff6600] font-mono">
+                            <FileText className="w-4 h-4 text-[#ff6600]" />
+                            <span className="font-bold">
                               {submission.fileName}
                             </span>
-                            <span className="text-xs text-slate-500">({submission.fileSizeMb})</span>
+                            <span className="text-xs text-slate-400">({submission.fileSizeMb})</span>
                           </div>
                         </td>
                       </tr>
                     )}
 
                     <tr>
-                      <td className="w-1/3 p-3.5 font-semibold text-slate-400 bg-[#0c1222] border-r border-slate-800">
+                      <td className="w-1/3 p-3.5 font-bold text-slate-500 bg-slate-50/80 border-r border-slate-100">
                         {t.assignment.rowSubmissionComments}
                       </td>
-                      <td className="p-3.5 text-slate-300">
+                      <td className="p-3.5 text-slate-700">
                         <details className="cursor-pointer">
-                          <summary className="text-blue-400 hover:underline font-medium">
+                          <summary className="text-[#ff6600] hover:underline font-bold">
                             {t.assignment.commentsCount(submission && submission.feedback ? '1' : '0')}
                           </summary>
                           {submission && submission.feedback && (
-                            <div className="p-3 mt-2 rounded-lg bg-[#0c1222] border border-slate-800 text-slate-300">
-                              <b className="text-blue-400">{t.assignment.teacherFeedbackPrefix}</b> {submission.feedback}
+                            <div className="p-3 mt-2 rounded-xl bg-orange-50/60 border border-orange-200/70 text-slate-700">
+                              <b className="text-[#ff6600]">{t.assignment.teacherFeedbackPrefix}</b> {submission.feedback}
                             </div>
                           )}
                         </details>
@@ -1992,57 +2016,59 @@ function MoodleTeacherGradingView({ paper, papers, submissions, t, onSelectPaper
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between text-xs text-blue-400">
+      <div className="flex items-center justify-between text-xs font-bold text-slate-500">
         <div className="flex items-center space-x-2 flex-wrap">
-          <button onClick={onBack} className="hover:text-blue-300 transition">{t.common.courseFullTitle}</button>
-          <span className="text-slate-600">&gt;</span>
-          <button onClick={onBack} className="hover:text-blue-300 transition font-mono">{paper.code}</button>
-          <span className="text-slate-600">&gt;</span>
-          <span className="text-slate-300 font-medium">{t.grading.breadcrumbTitle}</span>
+          <button onClick={onBack} className="hover:text-[#ff6600] transition cursor-pointer">{t.common.courseFullTitle}</button>
+          <span className="text-slate-300">&gt;</span>
+          <button onClick={onBack} className="hover:text-[#ff6600] transition font-mono">{paper.code}</button>
+          <span className="text-slate-300">&gt;</span>
+          <span className="text-slate-900 font-extrabold">{t.grading.breadcrumbTitle}</span>
         </div>
 
-        <button onClick={onBack} className="text-blue-400 hover:text-blue-300 hover:underline flex items-center space-x-1">
+        <button onClick={onBack} className="text-[#ff6600] hover:underline flex items-center space-x-1 cursor-pointer">
           <span>&larr; {t.grading.backToAssignment}</span>
         </button>
       </div>
 
-      <div className="bg-[#111827] rounded-2xl border border-slate-800 p-5 md:p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl border border-slate-100 p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg md:text-xl font-bold text-slate-100 flex items-center space-x-2.5">
-            <Layers className="w-5 h-5 text-blue-400" />
+          <h2 className="text-lg md:text-xl font-black text-slate-900 flex items-center space-x-2.5 tracking-tight">
+            <span className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200/80 text-[#ff6600] flex items-center justify-center shrink-0">
+              <Layers className="w-5 h-5" />
+            </span>
             <span>{t.grading.headingPrefix} {paper.title}</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1.5">
             {t.grading.subtitle}
           </p>
         </div>
 
         <button
           onClick={handleExportCSV}
-          className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition shadow-md shadow-emerald-600/25"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md shadow-emerald-500/20 cursor-pointer shrink-0"
         >
           <FileSpreadsheet className="w-4 h-4" />
           <span>{t.grading.exportCsv}</span>
         </button>
       </div>
 
-      <div className="bg-[#111827] rounded-xl border border-slate-800 p-3.5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-        <div className="flex items-center space-x-2.5 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+      <div className="bg-white rounded-3xl border border-slate-100 p-4 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="flex items-center space-x-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap gap-y-2">
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
               placeholder={t.grading.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3.5 py-2 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs bg-[#090d16] text-slate-100 placeholder-slate-500 transition"
+              className="w-full pl-10 pr-4 py-2 border border-slate-200/70 rounded-full focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-orange-100 text-xs bg-[#f8f8f6] text-slate-900 placeholder:text-slate-400 shadow-inner transition"
             />
           </div>
 
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 border border-slate-700/80 rounded-xl text-xs text-slate-300 bg-[#090d16] focus:outline-none focus:border-blue-500"
+            className="px-4 py-2 border border-slate-200 rounded-full text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-[#ff6600] cursor-pointer"
           >
             <option value="ALL">{t.grading.filterAll}</option>
             <option value="ON_TIME">{t.grading.filterOnTime}</option>
@@ -2050,40 +2076,40 @@ function MoodleTeacherGradingView({ paper, papers, submissions, t, onSelectPaper
           </select>
         </div>
 
-        <span className="text-xs text-slate-400 font-mono">
+        <span className="text-xs text-[#ff6600] font-black font-mono px-3 py-1 rounded-full bg-orange-50 border border-orange-200/80">
           {t.grading.showingCount(filtered.length)}
         </span>
       </div>
 
       {/* Submissions Table */}
-      <div className="bg-[#111827] rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-[#0c1222] border-b border-slate-800 text-slate-400 font-semibold tracking-wider text-[11px]">
+            <thead className="bg-slate-50/80 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="p-3.5">{t.grading.colStudentDetails}</th>
-                <th className="p-3.5">{t.grading.colStatus}</th>
-                <th className="p-3.5">{t.grading.colDuration}</th>
-                <th className="p-3.5">{t.grading.colGrade}</th>
-                <th className="p-3.5">{t.grading.colSubmittedAt}</th>
-                <th className="p-3.5">{t.grading.colAnswerScript}</th>
-                <th className="p-3.5 text-right">{t.grading.colAction}</th>
+                <th className="p-4">{t.grading.colStudentDetails}</th>
+                <th className="p-4">{t.grading.colStatus}</th>
+                <th className="p-4">{t.grading.colDuration}</th>
+                <th className="p-4">{t.grading.colGrade}</th>
+                <th className="p-4">{t.grading.colSubmittedAt}</th>
+                <th className="p-4">{t.grading.colAnswerScript}</th>
+                <th className="p-4 text-right">{t.grading.colAction}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 text-slate-200">
+            <tbody className="divide-y divide-slate-100 text-slate-700">
               {filtered.map((sub) => (
-                <tr key={sub.id} className="hover:bg-[#161f38]/40 transition">
-                  <td className="p-3.5">
-                    <div className="font-semibold text-blue-400">{sub.studentName}</div>
+                <tr key={sub.id} className="hover:bg-orange-50/20 transition-colors">
+                  <td className="p-4">
+                    <div className="font-extrabold text-slate-900">{sub.studentName}</div>
                     <div className="text-[11px] font-mono text-slate-400">{sub.studentIndex}</div>
                   </td>
-                  <td className="p-3.5">
-                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-semibold ${
+                  <td className="p-4">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                       sub.status === 'ON_TIME'
-                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         : sub.status === 'DISQUALIFIED'
-                        ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
-                        : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                        ? 'bg-red-50 text-red-700 border-red-200'
+                        : 'bg-amber-50 text-amber-800 border-amber-200'
                     }`}>
                       {sub.status === 'ON_TIME'
                         ? t.grading.statusOnTime
@@ -2092,42 +2118,42 @@ function MoodleTeacherGradingView({ paper, papers, submissions, t, onSelectPaper
                         : t.grading.statusLate}
                     </span>
                   </td>
-                  <td className="p-3.5 font-mono text-slate-300">
+                  <td className="p-4 font-mono font-semibold text-slate-700">
                     {t.common.minsUnit(sub.durationTakenMins)}
                   </td>
-                  <td className="p-3.5 font-semibold font-mono">
+                  <td className="p-4 font-bold font-mono">
                     {sub.marks !== null ? (
-                      <span className="text-emerald-400">{sub.marks} / {paper.totalMarks}</span>
+                      <span className="text-emerald-600 font-black">{sub.marks} / {paper.totalMarks}</span>
                     ) : (
-                      <span className="text-slate-500 italic font-normal">{t.grading.notGraded}</span>
+                      <span className="text-slate-400 italic font-normal">{t.grading.notGraded}</span>
                     )}
                   </td>
-                  <td className="p-3.5 text-slate-400 font-mono text-[11px]">
+                  <td className="p-4 text-slate-500 font-mono text-[11px]">
                     {sub.submittedAt}
                   </td>
-                  <td className="p-3.5 font-medium text-blue-400 max-w-xs truncate font-mono">
+                  <td className="p-4 font-bold text-[#ff6600] max-w-xs truncate font-mono">
                     {sub.filePath ? (
                       <a 
                         href={sub.filePath} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="flex items-center space-x-1.5 hover:underline text-blue-400"
+                        className="flex items-center space-x-1.5 hover:underline text-[#ff6600]"
                       >
-                        <FileText className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                        <FileText className="w-3.5 h-3.5 text-[#ff6600] shrink-0" />
                         <span className="truncate">{sub.fileName}</span>
-                        <ExternalLink className="w-3 h-3 text-slate-500 shrink-0" />
+                        <ExternalLink className="w-3 h-3 text-slate-400 shrink-0" />
                       </a>
                     ) : (
-                      <div className="flex items-center space-x-1.5">
-                        <FileText className="w-3.5 h-3.5 text-rose-400" />
+                      <div className="flex items-center space-x-1.5 text-slate-700">
+                        <FileText className="w-3.5 h-3.5 text-[#ff6600]" />
                         <span>{sub.fileName}</span>
                       </div>
                     )}
                   </td>
-                  <td className="p-3.5 text-right">
+                  <td className="p-4 text-right">
                     <button
                       onClick={() => onGradeSubmission(sub)}
-                      className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-xs"
+                      className="px-4 py-1.5 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs transition shadow-sm shadow-orange-500/20 cursor-pointer"
                     >
                       {t.grading.gradeBtn}
                     </button>
@@ -2199,34 +2225,34 @@ function MoodleCreatePaperModal({ t, defaultSection = 'Full Papers', onSave, onC
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-      <div className="bg-[#111827] rounded-2xl border border-slate-800 max-w-lg w-full p-6 md:p-7 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
-          <h3 className="text-base font-bold text-slate-100 tracking-tight">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl border border-slate-100 max-w-lg w-full p-6 md:p-7 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+          <h3 className="text-base font-black text-slate-900 tracking-tight">
             {t.createPaperModal.heading}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 transition">✕</button>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition cursor-pointer">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.paperTitleLabel}</label>
+            <label className="block text-slate-700 font-semibold mb-1.5">{t.createPaperModal.paperTitleLabel}</label>
             <input
               type="text"
               required
               placeholder={t.createPaperModal.paperTitlePlaceholder}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs bg-[#090d16] text-slate-100 placeholder-slate-500 transition"
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs bg-white text-slate-900 placeholder:text-slate-400 transition"
             />
           </div>
 
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.sectionLabel}</label>
+            <label className="block text-slate-700 font-semibold mb-1.5">{t.createPaperModal.sectionLabel}</label>
             <select
               value={section}
               onChange={(e) => setSection(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs bg-[#090d16] text-slate-100 font-medium transition"
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs bg-white text-slate-900 font-semibold transition"
             >
               {PAPER_SECTIONS.map((sec) => (
                 <option key={sec} value={sec}>
@@ -2238,11 +2264,11 @@ function MoodleCreatePaperModal({ t, defaultSection = 'Full Papers', onSave, onC
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.subjectStreamLabel}</label>
+              <label className="block text-slate-700 font-semibold mb-1.5">{t.createPaperModal.subjectStreamLabel}</label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs bg-[#090d16] text-slate-200 transition"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs bg-white text-slate-800 transition"
               >
                 <option value="Pure Mathematics">{t.createPaperModal.streamPure}</option>
                 <option value="Applied Mathematics">{t.createPaperModal.streamApplied}</option>
@@ -2250,7 +2276,7 @@ function MoodleCreatePaperModal({ t, defaultSection = 'Full Papers', onSave, onC
               </select>
             </div>
             <div>
-              <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.durationLabel}</label>
+              <label className="block text-slate-700 font-semibold mb-1.5">{t.createPaperModal.durationLabel}</label>
               <input
                 type="number"
                 required
@@ -2258,13 +2284,13 @@ function MoodleCreatePaperModal({ t, defaultSection = 'Full Papers', onSave, onC
                 max="360"
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(e.target.value)}
-                className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs font-mono bg-[#090d16] text-slate-100 transition"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs font-mono bg-white text-slate-900 transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.graceBufferLabel}</label>
+            <label className="block text-slate-700 font-semibold mb-1.5">{t.createPaperModal.graceBufferLabel}</label>
             <input
               type="number"
               required
@@ -2272,12 +2298,12 @@ function MoodleCreatePaperModal({ t, defaultSection = 'Full Papers', onSave, onC
               max="60"
               value={gracePeriodMinutes}
               onChange={(e) => setGracePeriodMinutes(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs font-mono bg-[#090d16] text-slate-100 transition"
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs font-mono bg-white text-slate-900 transition"
             />
           </div>
 
-          <div className="p-3.5 bg-[#0c1222] border border-slate-800 rounded-xl space-y-2">
-            <label className="block text-slate-300 font-semibold">{t.createPaperModal.uploadPdfLabel}</label>
+          <div className="p-3.5 bg-[#fffaf4] border border-orange-200/80 rounded-2xl space-y-2">
+            <label className="block text-slate-900 font-bold">{t.createPaperModal.uploadPdfLabel}</label>
             <input
               type="file"
               accept=".pdf"
@@ -2287,36 +2313,36 @@ function MoodleCreatePaperModal({ t, defaultSection = 'Full Papers', onSave, onC
             />
             <label
               htmlFor="teacher-new-pdf"
-              className="border border-dashed border-slate-700 rounded-lg p-3 flex items-center justify-between cursor-pointer hover:border-blue-500/60 bg-[#090d16] transition"
+              className="border border-dashed border-orange-300 rounded-xl p-3 flex items-center justify-between cursor-pointer hover:border-[#ff6600] bg-white transition"
             >
-              <span className="text-xs text-slate-300 truncate">
+              <span className="text-xs text-slate-700 truncate font-medium">
                 {pdfFile ? `${pdfFile.name} (${pdfFile.size})` : t.createPaperModal.selectPdfPrompt}
               </span>
-              <UploadCloud className="w-4 h-4 text-blue-400 shrink-0" />
+              <UploadCloud className="w-4 h-4 text-[#ff6600] shrink-0" />
             </label>
           </div>
 
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">{t.createPaperModal.instructionsLabel}</label>
+            <label className="block text-slate-700 font-semibold mb-1.5">{t.createPaperModal.instructionsLabel}</label>
             <textarea
               rows={2}
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs bg-[#090d16] text-slate-100 placeholder-slate-500 transition"
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs bg-white text-slate-900 placeholder:text-slate-400 transition"
             />
           </div>
 
-          <div className="flex justify-end space-x-2.5 pt-3.5 border-t border-slate-800">
+          <div className="flex justify-end space-x-2.5 pt-3.5 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"
+              className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
             >
               {t.common.cancel}
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs shadow-md shadow-blue-600/25 transition"
+              className="px-5 py-2.5 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs shadow-md shadow-orange-500/25 transition cursor-pointer"
             >
               {t.createPaperModal.saveAndPublish}
             </button>
@@ -2344,30 +2370,30 @@ function MoodleGradeModal({ submission, paper, t, onSave, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-      <div className="bg-[#111827] rounded-2xl border border-slate-800 max-w-lg w-full p-6 md:p-7 space-y-5 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl border border-slate-100 max-w-lg w-full p-6 md:p-7 space-y-5 shadow-2xl">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
           <div>
-            <h3 className="text-base font-bold text-slate-100 tracking-tight">{t.gradeModal.heading}</h3>
-            <p className="text-xs text-slate-400 mt-0.5">{t.gradeModal.studentLabel} <b className="text-blue-400">{submission.studentName}</b> (<span className="font-mono text-slate-300">{submission.studentIndex}</span>)</p>
+            <h3 className="text-base font-black text-slate-900 tracking-tight">{t.gradeModal.heading}</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{t.gradeModal.studentLabel} <b className="text-[#ff6600]">{submission.studentName}</b> (<span className="font-mono text-slate-700">{submission.studentIndex}</span>)</p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 transition">✕</button>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition cursor-pointer">✕</button>
         </div>
 
-        <div className="p-3.5 bg-[#0c1222] rounded-xl border border-slate-800 text-xs space-y-1.5">
+        <div className="p-4 bg-[#fffaf4] rounded-2xl border border-orange-200/70 text-xs space-y-1.5">
           <div className="flex justify-between">
-            <span className="text-slate-400">{t.gradeModal.fileScriptLabel}</span>
-            <span className="font-semibold text-blue-400 font-mono">{submission.fileName}</span>
+            <span className="text-slate-500 font-medium">{t.gradeModal.fileScriptLabel}</span>
+            <span className="font-bold text-[#ff6600] font-mono">{submission.fileName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-400">{t.gradeModal.durationTakenLabel}</span>
-            <span className="font-mono text-slate-200">{t.common.minsUnit(submission.durationTakenMins)}</span>
+            <span className="text-slate-500 font-medium">{t.gradeModal.durationTakenLabel}</span>
+            <span className="font-mono font-bold text-slate-800">{t.common.minsUnit(submission.durationTakenMins)}</span>
           </div>
         </div>
 
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">{t.gradeModal.gradeOutOfLabel(paper.totalMarks)}</label>
+            <label className="block text-slate-700 font-semibold mb-1.5">{t.gradeModal.gradeOutOfLabel(paper.totalMarks)}</label>
             <input
               type="number"
               min="0"
@@ -2375,32 +2401,32 @@ function MoodleGradeModal({ submission, paper, t, onSave, onClose }) {
               required
               value={marks}
               onChange={(e) => setMarks(e.target.value)}
-              className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 font-mono text-base font-bold bg-[#090d16] text-emerald-400 transition"
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 font-mono text-base font-black bg-white text-emerald-600 transition"
             />
           </div>
 
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">{t.gradeModal.feedbackLabel}</label>
+            <label className="block text-slate-700 font-semibold mb-1.5">{t.gradeModal.feedbackLabel}</label>
             <textarea
               rows={3}
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder={t.gradeModal.feedbackPlaceholder}
-              className="w-full px-3.5 py-2.5 border border-slate-700/80 rounded-xl focus:outline-none focus:border-blue-500 text-xs bg-[#090d16] text-slate-100 placeholder-slate-500 transition"
+              className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff6600] focus:ring-2 focus:ring-[#ff6600]/20 text-xs bg-white text-slate-900 placeholder:text-slate-400 transition"
             />
           </div>
 
-          <div className="flex justify-end space-x-2.5 pt-3.5 border-t border-slate-800">
+          <div className="flex justify-end space-x-2.5 pt-3.5 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium transition"
+              className="px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
             >
               {t.common.cancel}
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs shadow-md shadow-blue-600/25 transition"
+              className="px-5 py-2.5 rounded-full bg-[#ff6600] hover:bg-[#e65c00] text-white font-bold text-xs shadow-md shadow-orange-500/25 transition cursor-pointer"
             >
               {t.gradeModal.saveChanges}
             </button>
